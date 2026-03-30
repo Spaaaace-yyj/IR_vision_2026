@@ -1,0 +1,55 @@
+[0.043s] Invoking command in '/home/orangepi/Code/IR_vision/build/rplidar_ros': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/rplidar_ros -- -j8 -l8
+[0.174s] [  5%] Built target rplidar_client
+[0.192s] [ 52%] Built target rplidar_composition
+[0.252s] [100%] Built target rplidar_node
+[0.306s] Invoked command in '/home/orangepi/Code/IR_vision/build/rplidar_ros' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/rplidar_ros -- -j8 -l8
+[0.308s] Invoking command in '/home/orangepi/Code/IR_vision/build/rplidar_ros': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/rplidar_ros
+[0.309s] -- Install configuration: ""
+[0.309s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch
+[0.310s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/view_rplidar_a2m8_launch.py
+[0.310s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/view_rplidar_a3_launch.py
+[0.310s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/view_rplidar_a2m7_launch.py
+[0.310s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/rplidar_a1_launch.py
+[0.310s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/rplidar_t1_launch.py
+[0.310s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/rplidar_s1_tcp_launch.py
+[0.310s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/view_rplidar_t1_launch.py
+[0.310s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/view_rplidar_a2m12_launch.py
+[0.310s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/rplidar_a3_launch.py
+[0.310s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/rplidar_s3_launch.py
+[0.311s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/rplidar_a2m12_launch.py
+[0.311s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/rplidar_s1_launch.py
+[0.311s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/view_rplidar_s1_launch.py
+[0.312s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/rplidar_a2m8_launch.py
+[0.312s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/rplidar_s2_launch.py
+[0.312s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/view_rplidar_s2_launch.py
+[0.313s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/rplidar_a2m7_launch.py
+[0.314s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/view_rplidar_s2e_launch.py
+[0.314s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/view_rplidar_c1_launch.py
+[0.315s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/view_rplidar_s1_tcp_launch.py
+[0.315s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/rplidar_s2e_launch.py
+[0.315s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/rplidar_c1_launch.py
+[0.315s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/view_rplidar_a1_launch.py
+[0.316s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/launch/view_rplidar_s3_launch.py
+[0.316s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/rviz
+[0.316s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/rviz/rplidar_ros.rviz
+[0.316s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/lib/rplidar_ros/rplidar_node
+[0.317s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/lib/rplidar_ros/rplidar_composition
+[0.317s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/lib/rplidar_ros/rplidar_client
+[0.318s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/ament_index/resource_index/package_run_dependencies/rplidar_ros
+[0.318s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/ament_index/resource_index/parent_prefix_path/rplidar_ros
+[0.318s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/environment/ament_prefix_path.sh
+[0.319s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/environment/ament_prefix_path.dsv
+[0.321s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/environment/path.sh
+[0.322s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/environment/path.dsv
+[0.323s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/local_setup.bash
+[0.323s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/local_setup.sh
+[0.324s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/local_setup.zsh
+[0.324s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/local_setup.dsv
+[0.326s] -- Installing: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/package.dsv
+[0.326s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/ament_index/resource_index/packages/rplidar_ros
+[0.327s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/cmake/ament_cmake_export_dependencies-extras.cmake
+[0.328s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/cmake/ament_cmake_export_include_directories-extras.cmake
+[0.330s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/cmake/rplidar_rosConfig.cmake
+[0.330s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/cmake/rplidar_rosConfig-version.cmake
+[0.331s] -- Up-to-date: /home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/package.xml
+[0.345s] Invoked command in '/home/orangepi/Code/IR_vision/build/rplidar_ros' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/rplidar_ros

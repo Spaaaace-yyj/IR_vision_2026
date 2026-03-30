@@ -1,0 +1,6 @@
+Invoking command in '/home/orangepi/Code/IR_vision/build/car_control': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/orangepi/Code/IR_vision/src/car_control -DCMAKE_INSTALL_PREFIX=/home/orangepi/Code/IR_vision/install/car_control
+Invoked command in '/home/orangepi/Code/IR_vision/build/car_control' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/orangepi/Code/IR_vision/src/car_control -DCMAKE_INSTALL_PREFIX=/home/orangepi/Code/IR_vision/install/car_control
+Invoking command in '/home/orangepi/Code/IR_vision/build/car_control': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/car_control -- -j8 -l8
+Invoked command in '/home/orangepi/Code/IR_vision/build/car_control' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/car_control -- -j8 -l8
+Invoking command in '/home/orangepi/Code/IR_vision/build/car_control': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/car_control
+Invoked command in '/home/orangepi/Code/IR_vision/build/car_control' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/car_control

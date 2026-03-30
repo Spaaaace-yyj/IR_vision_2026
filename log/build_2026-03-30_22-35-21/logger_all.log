@@ -1,0 +1,436 @@
+[0.130s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build']
+[0.130s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=False, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=8, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0x7f98b180d0>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x7f98adfbb0>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x7f98adfbb0>>)
+[0.320s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.320s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.320s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.320s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.320s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[0.320s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.320s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/orangepi/Code/IR_vision'
+[0.320s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.321s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[0.321s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[0.321s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[0.321s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[0.321s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[0.321s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[0.321s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[0.321s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['cmake', 'python']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'cmake'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['python_setup_py']
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python_setup_py'
+[0.337s] Level 1:colcon.colcon_core.package_identification:_identify(Camera) by extensions ['ignore', 'ignore_ament_install']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(Camera) by extension 'ignore'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(Camera) by extension 'ignore_ament_install'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(Camera) by extensions ['colcon_pkg']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(Camera) by extension 'colcon_pkg'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(Camera) by extensions ['colcon_meta']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(Camera) by extension 'colcon_meta'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(Camera) by extensions ['ros']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(Camera) by extension 'ros'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(Camera) by extensions ['cmake', 'python']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(Camera) by extension 'cmake'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(Camera) by extension 'python'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(Camera) by extensions ['python_setup_py']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(Camera) by extension 'python_setup_py'
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/Data) by extensions ['ignore', 'ignore_ament_install']
+[0.338s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/Data) by extension 'ignore'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/Data) by extension 'ignore_ament_install'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/Data) by extensions ['colcon_pkg']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/Data) by extension 'colcon_pkg'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/Data) by extensions ['colcon_meta']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/Data) by extension 'colcon_meta'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/Data) by extensions ['ros']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/Data) by extension 'ros'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/Data) by extensions ['cmake', 'python']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/Data) by extension 'cmake'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/Data) by extension 'python'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/Data) by extensions ['python_setup_py']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/Data) by extension 'python_setup_py'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/log) by extensions ['ignore', 'ignore_ament_install']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/log) by extension 'ignore'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/log) by extension 'ignore_ament_install'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/log) by extensions ['colcon_pkg']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/log) by extension 'colcon_pkg'
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/log) by extensions ['colcon_meta']
+[0.339s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/log) by extension 'colcon_meta'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/log) by extensions ['ros']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/log) by extension 'ros'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/log) by extensions ['cmake', 'python']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/log) by extension 'cmake'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/log) by extension 'python'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/log) by extensions ['python_setup_py']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(Camera/log) by extension 'python_setup_py'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extensions ['ignore', 'ignore_ament_install']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extension 'ignore'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(build) ignored
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extensions ['ignore', 'ignore_ament_install']
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extension 'ignore'
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(install) ignored
+[0.340s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extensions ['ignore', 'ignore_ament_install']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extension 'ignore'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(log) ignored
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ignore', 'ignore_ament_install']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore_ament_install'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_pkg']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_pkg'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_meta']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_meta'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ros']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ros'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['cmake', 'python']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'cmake'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python'
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['python_setup_py']
+[0.341s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python_setup_py'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(src/car_control) by extensions ['ignore', 'ignore_ament_install']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(src/car_control) by extension 'ignore'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(src/car_control) by extension 'ignore_ament_install'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(src/car_control) by extensions ['colcon_pkg']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(src/car_control) by extension 'colcon_pkg'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(src/car_control) by extensions ['colcon_meta']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(src/car_control) by extension 'colcon_meta'
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(src/car_control) by extensions ['ros']
+[0.342s] Level 1:colcon.colcon_core.package_identification:_identify(src/car_control) by extension 'ros'
+[0.345s] DEBUG:colcon.colcon_core.package_identification:Package 'src/car_control' with type 'ros.ament_cmake' and name 'car_control'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver) by extensions ['ignore', 'ignore_ament_install']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver) by extension 'ignore'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver) by extension 'ignore_ament_install'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver) by extensions ['colcon_pkg']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver) by extension 'colcon_pkg'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver) by extensions ['colcon_meta']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver) by extension 'colcon_meta'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver) by extensions ['ros']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver) by extension 'ros'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver) by extensions ['cmake', 'python']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver) by extension 'cmake'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver) by extension 'python'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver) by extensions ['python_setup_py']
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver) by extension 'python_setup_py'
+[0.346s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/dji_Action4_camera) by extensions ['ignore', 'ignore_ament_install']
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/dji_Action4_camera) by extension 'ignore'
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/dji_Action4_camera) by extension 'ignore_ament_install'
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/dji_Action4_camera) by extensions ['colcon_pkg']
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/dji_Action4_camera) by extension 'colcon_pkg'
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/dji_Action4_camera) by extensions ['colcon_meta']
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/dji_Action4_camera) by extension 'colcon_meta'
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/dji_Action4_camera) by extensions ['ros']
+[0.347s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/dji_Action4_camera) by extension 'ros'
+[0.348s] DEBUG:colcon.colcon_core.package_identification:Package 'src/driver/dji_Action4_camera' with type 'ros.ament_cmake' and name 'dji_action4_camera'
+[0.348s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/mindvision_camera) by extensions ['ignore', 'ignore_ament_install']
+[0.348s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/mindvision_camera) by extension 'ignore'
+[0.348s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/mindvision_camera) by extension 'ignore_ament_install'
+[0.348s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/mindvision_camera) by extensions ['colcon_pkg']
+[0.348s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/mindvision_camera) by extension 'colcon_pkg'
+[0.348s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/mindvision_camera) by extensions ['colcon_meta']
+[0.348s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/mindvision_camera) by extension 'colcon_meta'
+[0.348s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/mindvision_camera) by extensions ['ros']
+[0.349s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/mindvision_camera) by extension 'ros'
+[0.350s] DEBUG:colcon.colcon_core.package_identification:Package 'src/driver/mindvision_camera' with type 'ros.ament_cmake' and name 'mindvision_camera'
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/rplidar_ros) by extensions ['ignore', 'ignore_ament_install']
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/rplidar_ros) by extension 'ignore'
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/rplidar_ros) by extension 'ignore_ament_install'
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/rplidar_ros) by extensions ['colcon_pkg']
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/rplidar_ros) by extension 'colcon_pkg'
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/rplidar_ros) by extensions ['colcon_meta']
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/rplidar_ros) by extension 'colcon_meta'
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/rplidar_ros) by extensions ['ros']
+[0.350s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/rplidar_ros) by extension 'ros'
+[0.351s] DEBUG:colcon.colcon_core.package_identification:Package 'src/driver/rplidar_ros' with type 'ros.ament_cmake' and name 'rplidar_ros'
+[0.351s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/usb_camera) by extensions ['ignore', 'ignore_ament_install']
+[0.351s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/usb_camera) by extension 'ignore'
+[0.351s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/usb_camera) by extension 'ignore_ament_install'
+[0.351s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/usb_camera) by extensions ['colcon_pkg']
+[0.351s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/usb_camera) by extension 'colcon_pkg'
+[0.352s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/usb_camera) by extensions ['colcon_meta']
+[0.352s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/usb_camera) by extension 'colcon_meta'
+[0.352s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/usb_camera) by extensions ['ros']
+[0.352s] Level 1:colcon.colcon_core.package_identification:_identify(src/driver/usb_camera) by extension 'ros'
+[0.352s] DEBUG:colcon.colcon_core.package_identification:Package 'src/driver/usb_camera' with type 'ros.ament_cmake' and name 'usb_camera'
+[0.353s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[0.353s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[0.353s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[0.353s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[0.353s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[0.378s] Level 5:colcon.colcon_core.verb:set package 'car_control' build argument 'cmake_args' from command line to 'None'
+[0.379s] Level 5:colcon.colcon_core.verb:set package 'car_control' build argument 'cmake_target' from command line to 'None'
+[0.379s] Level 5:colcon.colcon_core.verb:set package 'car_control' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.379s] Level 5:colcon.colcon_core.verb:set package 'car_control' build argument 'cmake_clean_cache' from command line to 'False'
+[0.379s] Level 5:colcon.colcon_core.verb:set package 'car_control' build argument 'cmake_clean_first' from command line to 'False'
+[0.379s] Level 5:colcon.colcon_core.verb:set package 'car_control' build argument 'cmake_force_configure' from command line to 'False'
+[0.379s] Level 5:colcon.colcon_core.verb:set package 'car_control' build argument 'ament_cmake_args' from command line to 'None'
+[0.379s] Level 5:colcon.colcon_core.verb:set package 'car_control' build argument 'catkin_cmake_args' from command line to 'None'
+[0.379s] Level 5:colcon.colcon_core.verb:set package 'car_control' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.379s] DEBUG:colcon.colcon_core.verb:Building package 'car_control' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/orangepi/Code/IR_vision/build/car_control', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/orangepi/Code/IR_vision/install/car_control', 'merge_install': False, 'path': '/home/orangepi/Code/IR_vision/src/car_control', 'symlink_install': False, 'test_result_base': None}
+[0.379s] Level 5:colcon.colcon_core.verb:set package 'dji_action4_camera' build argument 'cmake_args' from command line to 'None'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'dji_action4_camera' build argument 'cmake_target' from command line to 'None'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'dji_action4_camera' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'dji_action4_camera' build argument 'cmake_clean_cache' from command line to 'False'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'dji_action4_camera' build argument 'cmake_clean_first' from command line to 'False'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'dji_action4_camera' build argument 'cmake_force_configure' from command line to 'False'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'dji_action4_camera' build argument 'ament_cmake_args' from command line to 'None'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'dji_action4_camera' build argument 'catkin_cmake_args' from command line to 'None'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'dji_action4_camera' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.380s] DEBUG:colcon.colcon_core.verb:Building package 'dji_action4_camera' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/orangepi/Code/IR_vision/build/dji_action4_camera', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/orangepi/Code/IR_vision/install/dji_action4_camera', 'merge_install': False, 'path': '/home/orangepi/Code/IR_vision/src/driver/dji_Action4_camera', 'symlink_install': False, 'test_result_base': None}
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'mindvision_camera' build argument 'cmake_args' from command line to 'None'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'mindvision_camera' build argument 'cmake_target' from command line to 'None'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'mindvision_camera' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'mindvision_camera' build argument 'cmake_clean_cache' from command line to 'False'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'mindvision_camera' build argument 'cmake_clean_first' from command line to 'False'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'mindvision_camera' build argument 'cmake_force_configure' from command line to 'False'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'mindvision_camera' build argument 'ament_cmake_args' from command line to 'None'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'mindvision_camera' build argument 'catkin_cmake_args' from command line to 'None'
+[0.380s] Level 5:colcon.colcon_core.verb:set package 'mindvision_camera' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.380s] DEBUG:colcon.colcon_core.verb:Building package 'mindvision_camera' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/orangepi/Code/IR_vision/build/mindvision_camera', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/orangepi/Code/IR_vision/install/mindvision_camera', 'merge_install': False, 'path': '/home/orangepi/Code/IR_vision/src/driver/mindvision_camera', 'symlink_install': False, 'test_result_base': None}
+[0.381s] Level 5:colcon.colcon_core.verb:set package 'rplidar_ros' build argument 'cmake_args' from command line to 'None'
+[0.381s] Level 5:colcon.colcon_core.verb:set package 'rplidar_ros' build argument 'cmake_target' from command line to 'None'
+[0.381s] Level 5:colcon.colcon_core.verb:set package 'rplidar_ros' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.381s] Level 5:colcon.colcon_core.verb:set package 'rplidar_ros' build argument 'cmake_clean_cache' from command line to 'False'
+[0.381s] Level 5:colcon.colcon_core.verb:set package 'rplidar_ros' build argument 'cmake_clean_first' from command line to 'False'
+[0.381s] Level 5:colcon.colcon_core.verb:set package 'rplidar_ros' build argument 'cmake_force_configure' from command line to 'False'
+[0.381s] Level 5:colcon.colcon_core.verb:set package 'rplidar_ros' build argument 'ament_cmake_args' from command line to 'None'
+[0.381s] Level 5:colcon.colcon_core.verb:set package 'rplidar_ros' build argument 'catkin_cmake_args' from command line to 'None'
+[0.381s] Level 5:colcon.colcon_core.verb:set package 'rplidar_ros' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.381s] DEBUG:colcon.colcon_core.verb:Building package 'rplidar_ros' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/orangepi/Code/IR_vision/build/rplidar_ros', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/orangepi/Code/IR_vision/install/rplidar_ros', 'merge_install': False, 'path': '/home/orangepi/Code/IR_vision/src/driver/rplidar_ros', 'symlink_install': False, 'test_result_base': None}
+[0.382s] Level 5:colcon.colcon_core.verb:set package 'usb_camera' build argument 'cmake_args' from command line to 'None'
+[0.382s] Level 5:colcon.colcon_core.verb:set package 'usb_camera' build argument 'cmake_target' from command line to 'None'
+[0.382s] Level 5:colcon.colcon_core.verb:set package 'usb_camera' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.382s] Level 5:colcon.colcon_core.verb:set package 'usb_camera' build argument 'cmake_clean_cache' from command line to 'False'
+[0.382s] Level 5:colcon.colcon_core.verb:set package 'usb_camera' build argument 'cmake_clean_first' from command line to 'False'
+[0.382s] Level 5:colcon.colcon_core.verb:set package 'usb_camera' build argument 'cmake_force_configure' from command line to 'False'
+[0.382s] Level 5:colcon.colcon_core.verb:set package 'usb_camera' build argument 'ament_cmake_args' from command line to 'None'
+[0.382s] Level 5:colcon.colcon_core.verb:set package 'usb_camera' build argument 'catkin_cmake_args' from command line to 'None'
+[0.382s] Level 5:colcon.colcon_core.verb:set package 'usb_camera' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.382s] DEBUG:colcon.colcon_core.verb:Building package 'usb_camera' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/orangepi/Code/IR_vision/build/usb_camera', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/orangepi/Code/IR_vision/install/usb_camera', 'merge_install': False, 'path': '/home/orangepi/Code/IR_vision/src/driver/usb_camera', 'symlink_install': False, 'test_result_base': None}
+[0.382s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[0.384s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[0.385s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/orangepi/Code/IR_vision/src/car_control' with build type 'ament_cmake'
+[0.385s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/orangepi/Code/IR_vision/src/car_control'
+[0.388s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[0.388s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.388s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.393s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/orangepi/Code/IR_vision/src/driver/dji_Action4_camera' with build type 'ament_cmake'
+[0.393s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/orangepi/Code/IR_vision/src/driver/dji_Action4_camera'
+[0.393s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.394s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.397s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/orangepi/Code/IR_vision/src/driver/mindvision_camera' with build type 'ament_cmake'
+[0.397s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/orangepi/Code/IR_vision/src/driver/mindvision_camera'
+[0.397s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.397s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.401s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/orangepi/Code/IR_vision/src/driver/rplidar_ros' with build type 'ament_cmake'
+[0.401s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/orangepi/Code/IR_vision/src/driver/rplidar_ros'
+[0.401s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.402s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.405s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/orangepi/Code/IR_vision/src/driver/usb_camera' with build type 'ament_cmake'
+[0.405s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/orangepi/Code/IR_vision/src/driver/usb_camera'
+[0.406s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.406s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.420s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/orangepi/Code/IR_vision/build/car_control': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/car_control -- -j8 -l8
+[0.424s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/orangepi/Code/IR_vision/build/dji_action4_camera': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/dji_action4_camera -- -j8 -l8
+[0.429s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/orangepi/Code/IR_vision/build/mindvision_camera': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/mindvision_camera -- -j8 -l8
+[0.438s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/orangepi/Code/IR_vision/build/rplidar_ros': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/rplidar_ros -- -j8 -l8
+[0.445s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/orangepi/Code/IR_vision/build/usb_camera': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/usb_camera -- -j8 -l8
+[0.548s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/orangepi/Code/IR_vision/build/mindvision_camera' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/mindvision_camera -- -j8 -l8
+[0.606s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/orangepi/Code/IR_vision/build/mindvision_camera': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/mindvision_camera
+[0.615s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/orangepi/Code/IR_vision/build/dji_action4_camera' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/dji_action4_camera -- -j8 -l8
+[0.619s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/orangepi/Code/IR_vision/build/dji_action4_camera': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/dji_action4_camera
+[0.622s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/orangepi/Code/IR_vision/build/usb_camera' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/usb_camera -- -j8 -l8
+[0.622s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/orangepi/Code/IR_vision/build/usb_camera': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/usb_camera
+[0.654s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(mindvision_camera)
+[0.661s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/mindvision_camera' for CMake module files
+[0.663s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/mindvision_camera' for CMake config files
+[0.664s] Level 1:colcon.colcon_core.shell:create_environment_hook('mindvision_camera', 'cmake_prefix_path')
+[0.664s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/hook/cmake_prefix_path.ps1'
+[0.666s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/hook/cmake_prefix_path.dsv'
+[0.667s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/hook/cmake_prefix_path.sh'
+[0.669s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/mindvision_camera/lib'
+[0.670s] Level 1:colcon.colcon_core.shell:create_environment_hook('mindvision_camera', 'ld_library_path_lib')
+[0.670s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/hook/ld_library_path_lib.ps1'
+[0.672s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/hook/ld_library_path_lib.dsv'
+[0.673s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/hook/ld_library_path_lib.sh'
+[0.675s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/mindvision_camera/bin'
+[0.675s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/mindvision_camera/lib/pkgconfig/mindvision_camera.pc'
+[0.679s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/mindvision_camera/lib/python3.10/site-packages'
+[0.680s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/mindvision_camera/bin'
+[0.681s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/package.ps1'
+[0.683s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/package.dsv'
+[0.685s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/package.sh'
+[0.687s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/package.bash'
+[0.690s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/package.zsh'
+[0.694s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/orangepi/Code/IR_vision/install/mindvision_camera/share/colcon-core/packages/mindvision_camera)
+[0.695s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/orangepi/Code/IR_vision/build/mindvision_camera' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/mindvision_camera
+[0.696s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(mindvision_camera)
+[0.696s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/mindvision_camera' for CMake module files
+[0.697s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/mindvision_camera' for CMake config files
+[0.697s] Level 1:colcon.colcon_core.shell:create_environment_hook('mindvision_camera', 'cmake_prefix_path')
+[0.697s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/hook/cmake_prefix_path.ps1'
+[0.698s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/hook/cmake_prefix_path.dsv'
+[0.699s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/hook/cmake_prefix_path.sh'
+[0.700s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/mindvision_camera/lib'
+[0.700s] Level 1:colcon.colcon_core.shell:create_environment_hook('mindvision_camera', 'ld_library_path_lib')
+[0.701s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/hook/ld_library_path_lib.ps1'
+[0.701s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/hook/ld_library_path_lib.dsv'
+[0.702s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/hook/ld_library_path_lib.sh'
+[0.703s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/mindvision_camera/bin'
+[0.703s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/mindvision_camera/lib/pkgconfig/mindvision_camera.pc'
+[0.704s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/mindvision_camera/lib/python3.10/site-packages'
+[0.704s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/mindvision_camera/bin'
+[0.705s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/package.ps1'
+[0.706s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/package.dsv'
+[0.706s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/package.sh'
+[0.707s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/package.bash'
+[0.708s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/mindvision_camera/share/mindvision_camera/package.zsh'
+[0.709s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/orangepi/Code/IR_vision/install/mindvision_camera/share/colcon-core/packages/mindvision_camera)
+[0.711s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(usb_camera)
+[0.711s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/usb_camera' for CMake module files
+[0.713s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/orangepi/Code/IR_vision/build/usb_camera' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/usb_camera
+[0.713s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/usb_camera' for CMake config files
+[0.713s] Level 1:colcon.colcon_core.shell:create_environment_hook('usb_camera', 'cmake_prefix_path')
+[0.713s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/hook/cmake_prefix_path.ps1'
+[0.714s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/hook/cmake_prefix_path.dsv'
+[0.715s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/hook/cmake_prefix_path.sh'
+[0.716s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/usb_camera/lib'
+[0.716s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/usb_camera/bin'
+[0.716s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/usb_camera/lib/pkgconfig/usb_camera.pc'
+[0.717s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/usb_camera/lib/python3.10/site-packages'
+[0.717s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/usb_camera/bin'
+[0.718s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/package.ps1'
+[0.719s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/package.dsv'
+[0.720s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/package.sh'
+[0.720s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/package.bash'
+[0.721s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/package.zsh'
+[0.722s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/orangepi/Code/IR_vision/install/usb_camera/share/colcon-core/packages/usb_camera)
+[0.724s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(usb_camera)
+[0.724s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/usb_camera' for CMake module files
+[0.725s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/usb_camera' for CMake config files
+[0.726s] Level 1:colcon.colcon_core.shell:create_environment_hook('usb_camera', 'cmake_prefix_path')
+[0.726s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/hook/cmake_prefix_path.ps1'
+[0.727s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/hook/cmake_prefix_path.dsv'
+[0.728s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/hook/cmake_prefix_path.sh'
+[0.729s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/usb_camera/lib'
+[0.729s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/usb_camera/bin'
+[0.729s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/usb_camera/lib/pkgconfig/usb_camera.pc'
+[0.730s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/usb_camera/lib/python3.10/site-packages'
+[0.730s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/usb_camera/bin'
+[0.731s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/package.ps1'
+[0.732s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/package.dsv'
+[0.733s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/package.sh'
+[0.734s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/package.bash'
+[0.735s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/usb_camera/share/usb_camera/package.zsh'
+[0.736s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/orangepi/Code/IR_vision/install/usb_camera/share/colcon-core/packages/usb_camera)
+[0.753s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(dji_action4_camera)
+[0.754s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/dji_action4_camera' for CMake module files
+[0.757s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/dji_action4_camera' for CMake config files
+[0.757s] Level 1:colcon.colcon_core.shell:create_environment_hook('dji_action4_camera', 'cmake_prefix_path')
+[0.757s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/hook/cmake_prefix_path.ps1'
+[0.758s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/orangepi/Code/IR_vision/build/rplidar_ros' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/rplidar_ros -- -j8 -l8
+[0.760s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/hook/cmake_prefix_path.dsv'
+[0.761s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/orangepi/Code/IR_vision/build/rplidar_ros': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/rplidar_ros
+[0.762s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/orangepi/Code/IR_vision/build/dji_action4_camera' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/dji_action4_camera
+[0.762s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/hook/cmake_prefix_path.sh'
+[0.763s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/dji_action4_camera/lib'
+[0.763s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/dji_action4_camera/bin'
+[0.763s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/dji_action4_camera/lib/pkgconfig/dji_action4_camera.pc'
+[0.764s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/dji_action4_camera/lib/python3.10/site-packages'
+[0.764s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/dji_action4_camera/bin'
+[0.765s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/package.ps1'
+[0.766s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/package.dsv'
+[0.766s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/package.sh'
+[0.767s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/package.bash'
+[0.768s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/package.zsh'
+[0.769s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/colcon-core/packages/dji_action4_camera)
+[0.771s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(dji_action4_camera)
+[0.771s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/dji_action4_camera' for CMake module files
+[0.772s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/dji_action4_camera' for CMake config files
+[0.772s] Level 1:colcon.colcon_core.shell:create_environment_hook('dji_action4_camera', 'cmake_prefix_path')
+[0.772s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/hook/cmake_prefix_path.ps1'
+[0.773s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/hook/cmake_prefix_path.dsv'
+[0.774s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/hook/cmake_prefix_path.sh'
+[0.775s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/dji_action4_camera/lib'
+[0.775s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/dji_action4_camera/bin'
+[0.775s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/dji_action4_camera/lib/pkgconfig/dji_action4_camera.pc'
+[0.776s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/dji_action4_camera/lib/python3.10/site-packages'
+[0.776s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/dji_action4_camera/bin'
+[0.777s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/package.ps1'
+[0.778s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/package.dsv'
+[0.778s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/package.sh'
+[0.779s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/package.bash'
+[0.780s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/dji_action4_camera/package.zsh'
+[0.781s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/orangepi/Code/IR_vision/install/dji_action4_camera/share/colcon-core/packages/dji_action4_camera)
+[0.784s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(rplidar_ros)
+[0.785s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/rplidar_ros' for CMake module files
+[0.786s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/rplidar_ros' for CMake config files
+[0.788s] Level 1:colcon.colcon_core.shell:create_environment_hook('rplidar_ros', 'cmake_prefix_path')
+[0.788s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/hook/cmake_prefix_path.ps1'
+[0.790s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/hook/cmake_prefix_path.dsv'
+[0.791s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/hook/cmake_prefix_path.sh'
+[0.793s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/rplidar_ros/lib'
+[0.793s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/rplidar_ros/bin'
+[0.793s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/rplidar_ros/lib/pkgconfig/rplidar_ros.pc'
+[0.794s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/rplidar_ros/lib/python3.10/site-packages'
+[0.794s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/rplidar_ros/bin'
+[0.795s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/package.ps1'
+[0.797s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/package.dsv'
+[0.798s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/package.sh'
+[0.800s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/package.bash'
+[0.801s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/package.zsh'
+[0.802s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/orangepi/Code/IR_vision/install/rplidar_ros/share/colcon-core/packages/rplidar_ros)
+[0.814s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/orangepi/Code/IR_vision/build/rplidar_ros' returned '0': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/rplidar_ros
+[0.816s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(rplidar_ros)
+[0.816s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/rplidar_ros' for CMake module files
+[0.818s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/rplidar_ros' for CMake config files
+[0.819s] Level 1:colcon.colcon_core.shell:create_environment_hook('rplidar_ros', 'cmake_prefix_path')
+[0.819s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/hook/cmake_prefix_path.ps1'
+[0.821s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/hook/cmake_prefix_path.dsv'
+[0.822s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/hook/cmake_prefix_path.sh'
+[0.824s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/rplidar_ros/lib'
+[0.824s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/rplidar_ros/bin'
+[0.824s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/rplidar_ros/lib/pkgconfig/rplidar_ros.pc'
+[0.825s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/rplidar_ros/lib/python3.10/site-packages'
+[0.826s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/rplidar_ros/bin'
+[0.826s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/package.ps1'
+[0.827s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/package.dsv'
+[0.828s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/package.sh'
+[0.829s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/package.bash'
+[0.830s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/rplidar_ros/share/rplidar_ros/package.zsh'
+[0.831s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/orangepi/Code/IR_vision/install/rplidar_ros/share/colcon-core/packages/rplidar_ros)
+[7.974s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/orangepi/Code/IR_vision/build/car_control' returned '2': CMAKE_PREFIX_PATH=/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/car_control -- -j8 -l8
+[7.975s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(car_control)
+[7.977s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/car_control' for CMake module files
+[7.979s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/car_control' for CMake config files
+[7.980s] Level 1:colcon.colcon_core.shell:create_environment_hook('car_control', 'cmake_prefix_path')
+[7.981s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/car_control/share/car_control/hook/cmake_prefix_path.ps1'
+[7.983s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/orangepi/Code/IR_vision/install/car_control/share/car_control/hook/cmake_prefix_path.dsv'
+[7.985s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/orangepi/Code/IR_vision/install/car_control/share/car_control/hook/cmake_prefix_path.sh'
+[7.987s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/car_control/lib'
+[7.988s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/car_control/bin'
+[7.988s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/car_control/lib/pkgconfig/car_control.pc'
+[7.989s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/car_control/lib/python3.10/site-packages'
+[7.991s] Level 1:colcon.colcon_core.environment:checking '/home/orangepi/Code/IR_vision/install/car_control/bin'
+[7.993s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/car_control/share/car_control/package.ps1'
+[7.995s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/orangepi/Code/IR_vision/install/car_control/share/car_control/package.dsv'
+[7.998s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/car_control/share/car_control/package.sh'
+[8.000s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/car_control/share/car_control/package.bash'
+[8.002s] INFO:colcon.colcon_core.shell:Creating package script '/home/orangepi/Code/IR_vision/install/car_control/share/car_control/package.zsh'
+[8.003s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/orangepi/Code/IR_vision/install/car_control/share/colcon-core/packages/car_control)
+[8.015s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[8.016s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[8.016s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '2'
+[8.017s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[8.024s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[8.024s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[8.025s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[8.047s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[8.047s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/orangepi/Code/IR_vision/install/local_setup.ps1'
+[8.049s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/orangepi/Code/IR_vision/install/_local_setup_util_ps1.py'
+[8.051s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/orangepi/Code/IR_vision/install/setup.ps1'
+[8.052s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/orangepi/Code/IR_vision/install/local_setup.sh'
+[8.053s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/orangepi/Code/IR_vision/install/_local_setup_util_sh.py'
+[8.054s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/orangepi/Code/IR_vision/install/setup.sh'
+[8.059s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/orangepi/Code/IR_vision/install/local_setup.bash'
+[8.094s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/orangepi/Code/IR_vision/install/setup.bash'
+[8.099s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/orangepi/Code/IR_vision/install/local_setup.zsh'
+[8.101s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/orangepi/Code/IR_vision/install/setup.zsh'

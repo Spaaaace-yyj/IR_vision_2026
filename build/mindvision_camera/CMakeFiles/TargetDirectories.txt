@@ -1,0 +1,11 @@
+/home/orangepi/Code/IR_vision/build/mindvision_camera/CMakeFiles/uninstall.dir
+/home/orangepi/Code/IR_vision/build/mindvision_camera/CMakeFiles/mindvision_camera_uninstall.dir
+/home/orangepi/Code/IR_vision/build/mindvision_camera/CMakeFiles/mindvision_camera.dir
+/home/orangepi/Code/IR_vision/build/mindvision_camera/CMakeFiles/mindvision_camera_node.dir
+/home/orangepi/Code/IR_vision/build/mindvision_camera/CMakeFiles/test.dir
+/home/orangepi/Code/IR_vision/build/mindvision_camera/CMakeFiles/edit_cache.dir
+/home/orangepi/Code/IR_vision/build/mindvision_camera/CMakeFiles/rebuild_cache.dir
+/home/orangepi/Code/IR_vision/build/mindvision_camera/CMakeFiles/list_install_components.dir
+/home/orangepi/Code/IR_vision/build/mindvision_camera/CMakeFiles/install.dir
+/home/orangepi/Code/IR_vision/build/mindvision_camera/CMakeFiles/install/local.dir
+/home/orangepi/Code/IR_vision/build/mindvision_camera/CMakeFiles/install/strip.dir

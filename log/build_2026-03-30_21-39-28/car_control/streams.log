@@ -1,0 +1,71 @@
+[0.045s] Invoking command in '/home/orangepi/Code/IR_vision/build/car_control': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/orangepi/Code/IR_vision/src/car_control -DCMAKE_INSTALL_PREFIX=/home/orangepi/Code/IR_vision/install/car_control
+[0.160s] -- The C compiler identification is GNU 11.4.0
+[0.320s] -- The CXX compiler identification is GNU 11.4.0
+[0.347s] -- Detecting C compiler ABI info
+[0.530s] -- Detecting C compiler ABI info - done
+[0.570s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.571s] -- Detecting C compile features
+[0.572s] -- Detecting C compile features - done
+[0.578s] -- Detecting CXX compiler ABI info
+[0.839s] -- Detecting CXX compiler ABI info - done
+[0.851s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.851s] -- Detecting CXX compile features
+[0.852s] -- Detecting CXX compile features - done
+[0.855s] -- Found ament_cmake: 1.3.14 (/opt/ros/humble/share/ament_cmake/cmake)
+[1.264s] -- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter 
+[1.497s] -- Found rclcpp: 16.0.18 (/opt/ros/humble/share/rclcpp/cmake)
+[1.570s] -- Found rosidl_generator_c: 3.1.8 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[1.576s] -- Found rosidl_adapter: 3.1.8 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[1.588s] -- Found rosidl_generator_cpp: 3.1.8 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[1.607s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[1.629s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[1.695s] -- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+[1.698s] -- Found rmw_fastrtps_cpp: 6.2.10 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)
+[1.930s] -- Found OpenSSL: /usr/lib/aarch64-linux-gnu/libcrypto.so (found version "3.0.2")  
+[2.033s] -- Found FastRTPS: /opt/ros/humble/include  
+[2.138s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[2.151s] -- Looking for pthread.h
+[2.292s] -- Looking for pthread.h - found
+[2.293s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+[2.497s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+[2.499s] -- Found Threads: TRUE  
+[2.584s] -- Found OpenCV: /usr/local (found version "4.8.0") 
+[2.587s] -- Found sensor_msgs: 4.9.1 (/opt/ros/humble/share/sensor_msgs/cmake)
+[2.634s] -- Found ament_lint_auto: 0.12.15 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[2.791s] -- OpenCV version: 4.8.0
+[2.803s] -- Added test 'cppcheck' to perform static code analysis on C / C++ code
+[2.804s] -- Configured cppcheck include dirs: 
+[2.804s] -- Configured cppcheck exclude dirs and/or files: 
+[2.806s] -- Added test 'lint_cmake' to check CMake code style
+[2.807s] -- Added test 'uncrustify' to check C / C++ code style
+[2.807s] -- Configured uncrustify additional arguments: 
+[2.808s] -- Added test 'xmllint' to check XML markup files
+[2.812s] -- Configuring done
+[2.867s] -- Generating done
+[2.894s] -- Build files have been written to: /home/orangepi/Code/IR_vision/build/car_control
+[2.957s] Invoked command in '/home/orangepi/Code/IR_vision/build/car_control' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/orangepi/Code/IR_vision/src/car_control -DCMAKE_INSTALL_PREFIX=/home/orangepi/Code/IR_vision/install/car_control
+[2.958s] Invoking command in '/home/orangepi/Code/IR_vision/build/car_control': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/car_control -- -j8 -l8
+[3.243s] [ 50%] [32mBuilding CXX object CMakeFiles/car_control.dir/src/car_control_node.cpp.o[0m
+[24.894s] [100%] [32m[1mLinking CXX executable car_control[0m
+[26.054s] [100%] Built target car_control
+[26.103s] Invoked command in '/home/orangepi/Code/IR_vision/build/car_control' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/car_control -- -j8 -l8
+[26.113s] Invoking command in '/home/orangepi/Code/IR_vision/build/car_control': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/car_control
+[26.142s] -- Install configuration: ""
+[26.143s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/lib/car_control/car_control
+[26.148s] -- Set runtime path of "/home/orangepi/Code/IR_vision/install/car_control/lib/car_control/car_control" to ""
+[26.150s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/share/ament_index/resource_index/package_run_dependencies/car_control
+[26.150s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/share/ament_index/resource_index/parent_prefix_path/car_control
+[26.151s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/share/car_control/environment/ament_prefix_path.sh
+[26.151s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/share/car_control/environment/ament_prefix_path.dsv
+[26.152s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/share/car_control/environment/path.sh
+[26.152s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/share/car_control/environment/path.dsv
+[26.153s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/share/car_control/local_setup.bash
+[26.154s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/share/car_control/local_setup.sh
+[26.156s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/share/car_control/local_setup.zsh
+[26.156s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/share/car_control/local_setup.dsv
+[26.157s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/share/car_control/package.dsv
+[26.158s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/share/ament_index/resource_index/packages/car_control
+[26.158s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/share/car_control/cmake/car_controlConfig.cmake
+[26.160s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/share/car_control/cmake/car_controlConfig-version.cmake
+[26.161s] -- Installing: /home/orangepi/Code/IR_vision/install/car_control/share/car_control/package.xml
+[26.162s] Invoked command in '/home/orangepi/Code/IR_vision/build/car_control' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/car_control
