@@ -1,6 +1,0 @@
-Invoking command in '/home/orangepi/Code/IR_vision/build/usb_camera': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/orangepi/Code/IR_vision/src/driver/usb_camera -DCMAKE_INSTALL_PREFIX=/home/orangepi/Code/IR_vision/install/usb_camera
-Invoked command in '/home/orangepi/Code/IR_vision/build/usb_camera' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake /home/orangepi/Code/IR_vision/src/driver/usb_camera -DCMAKE_INSTALL_PREFIX=/home/orangepi/Code/IR_vision/install/usb_camera
-Invoking command in '/home/orangepi/Code/IR_vision/build/usb_camera': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/usb_camera -- -j8 -l8
-Invoked command in '/home/orangepi/Code/IR_vision/build/usb_camera' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --build /home/orangepi/Code/IR_vision/build/usb_camera -- -j8 -l8
-Invoking command in '/home/orangepi/Code/IR_vision/build/usb_camera': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/usb_camera
-Invoked command in '/home/orangepi/Code/IR_vision/build/usb_camera' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/humble /usr/bin/cmake --install /home/orangepi/Code/IR_vision/build/usb_camera
