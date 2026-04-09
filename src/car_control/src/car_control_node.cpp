@@ -1,9 +1,15 @@
 #include "../include/car_control/car_control_node.hpp"
 
+#include <algorithm>
+#include <cmath>
+#include <iomanip>
+#include <sstream>
+
 CarControlNode::CarControlNode() : Node("car_control_node")
 {
     //打开摄像头
-    cap_.open(1, cv::CAP_V4L2);
+    // cap_.open(1, cv::CAP_V4L2);
+    cap_.open(1);
     if(!cap_.isOpened()){
         RCLCPP_ERROR(this->get_logger(), "Cannot open camera");
         return; 
@@ -11,6 +17,10 @@ CarControlNode::CarControlNode() : Node("car_control_node")
 
     image_timer_ = this->create_wall_timer(33ms, std::bind(&CarControlNode::imageCallback, this));
     image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/car_control/image_debug", rclcpp::SensorDataQoS());
+    scan_subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
+        "/scan",
+        rclcpp::SensorDataQoS(),
+        std::bind(&CarControlNode::scanCallback, this, std::placeholders::_1));
 
     detector_dict_ = cv::makePtr<cv::aruco::Dictionary>(
         cv::aruco::getPredefinedDictionary(cv::aruco::DICT_APRILTAG_36h11));    
@@ -22,6 +32,28 @@ CarControlNode::CarControlNode() : Node("car_control_node")
     
     tag_size = this->declare_parameter("tag_size", 0.08);
     cube_size = this->declare_parameter("cube_size", 0.15);
+
+    const auto load_vec3_parameter = [this](const std::string& name) {
+        std::vector<double> values = this->declare_parameter<std::vector<double>>(
+            name, {0.0, 0.0, 0.0});
+
+        if (values.size() != 3) {
+            RCLCPP_WARN(
+                this->get_logger(),
+                "Parameter %s must contain exactly 3 elements, fallback to zeros.",
+                name.c_str());
+            values = {0.0, 0.0, 0.0};
+        }
+
+        return cv::Vec3d(values[0], values[1], values[2]);
+    };
+
+    camera_to_base_translation_ = load_vec3_parameter("camera_to_base.translation");
+    camera_to_base_rotation_ =
+        rpyToRotationMatrix(load_vec3_parameter("camera_to_base.rpy"));
+    lidar_to_base_translation_ = load_vec3_parameter("lidar_to_base.translation");
+    lidar_to_base_rotation_ =
+        rpyToRotationMatrix(load_vec3_parameter("lidar_to_base.rpy"));
 
     float half_len = tag_size / 2;
     tag_def_point.emplace_back(cv::Point3f(-half_len, half_len, 0));
@@ -119,7 +151,7 @@ void CarControlNode::imageCallback()
     //Roi内识别
     for (auto &roi : candidate_rois)
     {
-        cv::Mat sub = gray(roi);
+        cv::Mat sub = frame(roi);
 
         std::vector<int> ids;
         std::vector<std::vector<cv::Point2f>> corners;
@@ -172,12 +204,21 @@ void CarControlNode::imageCallback()
     }
     //debug
     if (!marker_ids.empty()) {
-        cv::aruco::drawDetectedMarkers(frame, marker_corners, marker_ids);
+        // cv::aruco::drawDetectedMarkers(frame, marker_corners, marker_ids);
+        for(size_t i = 0; i < marker_ids.size(); i++)
+        {
+            cv::line(frame, marker_corners[i][0], marker_corners[i][1], cv::Scalar(0,255,0), 1);
+            cv::line(frame, marker_corners[i][1], marker_corners[i][2], cv::Scalar(0,255,0), 1);
+            cv::line(frame, marker_corners[i][2], marker_corners[i][3], cv::Scalar(0,255,0), 1);
+            cv::line(frame, marker_corners[i][3], marker_corners[i][0], cv::Scalar(0,255,0), 1);
+        }
     }
 
     auto groups = groupById(marker_ids);
 
     std::vector<CubeState> cubes;
+    std::vector<CubeState> cubes_base;
+    cubes_base.reserve(groups.size());
 
     for (auto &[id, indices] : groups)
     {
@@ -189,11 +230,12 @@ void CarControlNode::imageCallback()
             camera_matrix_,
             dist_coeffs_);
 
-        if (cube.valid)
+        if (cube.valid) {
             cubes.push_back(cube);
+            //转换到底盘坐标系
+            cubes_base.push_back(transformCubeToBase(cube));
+        }
     }
-
-    drawCubes(frame, cubes, camera_matrix_, dist_coeffs_);
 
     double latency = (this->now() - t0).seconds() * 1000.0;
 
@@ -210,6 +252,8 @@ void CarControlNode::imageCallback()
     {
         std::lock_guard<std::mutex> lock(img_mutex_);
         latest_frame_ = frame.clone();
+        cubes_ = cubes;
+        cubes_base_ = cubes_base;
     }
 }
 
@@ -218,20 +262,75 @@ void CarControlNode::debugThread()
     while (rclcpp::ok())
     {
         cv::Mat img;
+        std::vector<CubeState> cubes;
+        std::vector<CubeState> cubes_base;
+        std::vector<cv::Point3f> laser_points_base;
 
         {
             std::lock_guard<std::mutex> lock(img_mutex_);
 
-            if (latest_frame_.empty())
-                continue;
-
-            img = latest_frame_.clone();
+            if (!latest_frame_.empty()) {
+                img = latest_frame_.clone();
+            }
+            cubes = cubes_;
+            cubes_base = cubes_base_;
+            laser_points_base = laser_points_base_;
         }
 
-        cv::imshow("Camera", img);
+        if (!img.empty()) {
+            int image_width = img.cols;
+            int image_height = img.rows;
+            drawCubes(img, cubes, camera_matrix_, dist_coeffs_);
+            cv::line(img, cv::Point(image_width / 2, 0), cv::Point(image_width / 2, image_height), cv::Scalar(255,255,255), 1);
+            cv::line(img, cv::Point(0, image_height / 2), cv::Point(image_width, image_height / 2), cv::Scalar(255,255,255), 1);
+            cv::circle(img, cv::Point(image_width / 2, image_height / 2), 15, cv::Scalar(100,255,100), 1);
+            cv::imshow("Camera", img);
+        }
+
+        cv::Mat laser_scan_view = buildLaserScanView(laser_points_base, cubes_base);
+        cv::imshow("LaserScan", laser_scan_view);
         cv::waitKey(1);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+}
+
+cv::Point2f CarControlNode::polarToCartesian(float range, float angle_rad)
+{
+    return cv::Point2f(
+        range * std::cos(angle_rad),
+        range * std::sin(angle_rad));
+}
+
+std::vector<cv::Point2f> CarControlNode::laserScanToCartesian(
+    const sensor_msgs::msg::LaserScan& scan)
+{
+    std::vector<cv::Point2f> points;
+    points.reserve(scan.ranges.size());
+
+    float angle = scan.angle_min;
+    for (const float range : scan.ranges) {
+        if (std::isfinite(range) &&
+            range >= scan.range_min &&
+            range <= scan.range_max) {
+            points.emplace_back(polarToCartesian(range, angle));
+        }
+        angle += scan.angle_increment;
+    }
+
+    return points;
+}
+
+void CarControlNode::scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
+{
+    const std::vector<cv::Point2f> laser_points = laserScanToCartesian(*msg);
+    //转换到底盘坐标系
+    const std::vector<cv::Point3f> laser_points_base =
+        transformLaserPointsToBase(laser_points);
+
+    {
+        std::lock_guard<std::mutex> lock(img_mutex_);
+        laser_points_base_ = laser_points_base;
     }
 }
 
@@ -294,6 +393,8 @@ CubeState CarControlNode::estimateCube(
     avg *= (1.0 / centers.size());
 
     cube.center = avg;
+    cube.tvec = (cv::Mat_<double>(3,1) << avg.x, avg.y, avg.z);
+    cube.rvec = rvecs[0];
 
     // 暂时用第一个姿态
     cv::Rodrigues(rvecs[0], cube.R);
@@ -302,12 +403,139 @@ CubeState CarControlNode::estimateCube(
     return cube;
 }
 
+cv::Matx33d CarControlNode::rpyToRotationMatrix(const cv::Vec3d& rpy)
+{
+    const double roll = rpy[0];
+    const double pitch = rpy[1];
+    const double yaw = rpy[2];
+
+    const double cr = std::cos(roll);
+    const double sr = std::sin(roll);
+    const double cp = std::cos(pitch);
+    const double sp = std::sin(pitch);
+    const double cy = std::cos(yaw);
+    const double sy = std::sin(yaw);
+
+    const cv::Matx33d rotation_x(
+        1.0, 0.0, 0.0,
+        0.0, cr, -sr,
+        0.0, sr, cr);
+
+    const cv::Matx33d rotation_y(
+        cp, 0.0, sp,
+        0.0, 1.0, 0.0,
+        -sp, 0.0, cp);
+
+    const cv::Matx33d rotation_z(
+        cy, -sy, 0.0,
+        sy, cy, 0.0,
+        0.0, 0.0, 1.0);
+
+    return rotation_z * rotation_y * rotation_x;
+}
+
+cv::Point3f CarControlNode::transformPoint(
+    const cv::Point3f& point,
+    const cv::Matx33d& rotation,
+    const cv::Vec3d& translation)
+{
+    const cv::Vec3d point_vec(point.x, point.y, point.z);
+    const cv::Vec3d transformed = rotation * point_vec + translation;
+
+    return cv::Point3f(
+        static_cast<float>(transformed[0]),
+        static_cast<float>(transformed[1]),
+        static_cast<float>(transformed[2]));
+}
+
+CubeState CarControlNode::transformCubeToBase(const CubeState& cube) const
+{
+    CubeState transformed_cube;
+    transformed_cube.id = cube.id;
+    transformed_cube.valid = cube.valid;
+    transformed_cube.center = transformPoint(
+        cube.center,
+        camera_to_base_rotation_,
+        camera_to_base_translation_);
+
+    transformed_cube.tvec = (cv::Mat_<double>(3, 1) <<
+        transformed_cube.center.x,
+        transformed_cube.center.y,
+        transformed_cube.center.z);
+
+    if (!cube.R.empty()) {
+        transformed_cube.R = cv::Mat(camera_to_base_rotation_) * cube.R;
+        cv::Rodrigues(transformed_cube.R, transformed_cube.rvec);
+    }
+
+    transformed_cube.tags.reserve(cube.tags.size());
+    for (const auto& source_tag : cube.tags) {
+        TagPose transformed_tag;
+        transformed_tag.id = source_tag.id;
+        transformed_tag.center = transformPoint(
+            source_tag.center,
+            camera_to_base_rotation_,
+            camera_to_base_translation_);
+
+        transformed_tag.tvec = (cv::Mat_<double>(3, 1) <<
+            transformed_tag.center.x,
+            transformed_tag.center.y,
+            transformed_tag.center.z);
+
+        if (!source_tag.rvec.empty()) {
+            cv::Mat tag_rotation;
+            cv::Rodrigues(source_tag.rvec, tag_rotation);
+            tag_rotation = cv::Mat(camera_to_base_rotation_) * tag_rotation;
+            cv::Rodrigues(tag_rotation, transformed_tag.rvec);
+        }
+
+        transformed_cube.tags.push_back(std::move(transformed_tag));
+    }
+
+    return transformed_cube;
+}
+
+std::vector<cv::Point3f> CarControlNode::transformLaserPointsToBase(
+    const std::vector<cv::Point2f>& laser_points) const
+{
+    std::vector<cv::Point3f> transformed_points;
+    transformed_points.reserve(laser_points.size());
+
+    for (const auto& point : laser_points) {
+        transformed_points.push_back(transformPoint(
+            cv::Point3f(point.x, point.y, 0.0F),
+            lidar_to_base_rotation_,
+            lidar_to_base_translation_));
+    }
+
+    return transformed_points;
+}
+
 void CarControlNode::drawCubes(
     cv::Mat& frame,
     const std::vector<CubeState>& cubes,
     const cv::Mat& camera_matrix,
     const cv::Mat& dist_coeffs)
 {
+    if(cubes.empty()){
+        cv::putText(frame, "No cubes detected",
+            cv::Point(10, 60),
+            cv::FONT_HERSHEY_SIMPLEX,
+            1.0,
+            cv::Scalar(0,0,255),
+            2);
+        return;
+    }else{
+        std::stringstream ss;
+        ss << "Cubes detected num: " << cubes.size();
+
+        cv::putText(frame, ss.str(),
+            cv::Point(10, 60),
+            cv::FONT_HERSHEY_SIMPLEX,
+            1.0,
+            cv::Scalar(0,255,0),
+            2);
+    }
     for (const auto& cube : cubes)
     {
         if (!cube.valid) continue;
@@ -322,15 +550,16 @@ void CarControlNode::drawCubes(
             center2d);
 
         if (!center2d.empty()) {
-            cv::circle(frame, center2d[0], 6, cv::Scalar(0,255,255), -1);
+            cv::circle(frame, center2d[0], 3, cv::Scalar(100,255,255), -1);
+            cv::line(frame, center2d[0], cv::Point(frame.cols / 2, frame.rows), cv::Scalar(255,255,255), 1);
 
             cv::putText(frame,
                 "ID:" + std::to_string(cube.id),
                 center2d[0],
                 cv::FONT_HERSHEY_SIMPLEX,
                 0.6,
-                cv::Scalar(0,255,255),
-                2);
+                cv::Scalar(0,0,255),
+                1);
         }
 
         float l = cube_size / 2.0;
@@ -373,7 +602,7 @@ void CarControlNode::drawCubes(
         std::vector<std::pair<int,int>> edges = {
             {0,1},{1,2},{2,3},{3,0},
             {4,5},{5,6},{6,7},{7,4},
-            {0,4},{1,5},{2,6},{3,7}
+            {0,4},{1,5},{2,6},{3,7},
         };
 
         cv::Scalar edge_color;
@@ -391,7 +620,7 @@ void CarControlNode::drawCubes(
                 pts2d[e.first],
                 pts2d[e.second],
                 edge_color,
-                2);
+                1);
         }
 
         for (auto &tag : cube.tags)
@@ -401,9 +630,123 @@ void CarControlNode::drawCubes(
                 dist_coeffs,
                 tag.rvec,
                 tag.tvec,
-                0.05);
+                0.04);
         }
     }
+}
+
+
+//debug
+cv::Mat CarControlNode::buildLaserScanView(
+    const std::vector<cv::Point3f>& points,
+    const std::vector<CubeState>& cubes,
+    int image_size)
+{
+    constexpr int kMargin = 30;
+    cv::Mat view(image_size, image_size, CV_8UC3, cv::Scalar(30, 30, 30));
+    int valid_cube_count = 0;
+
+    const cv::Point center(image_size / 2, image_size / 2);
+    cv::line(view, cv::Point(center.x, 0), cv::Point(center.x, image_size), cv::Scalar(80, 80, 80), 1);
+    cv::line(view, cv::Point(0, center.y), cv::Point(image_size, center.y), cv::Scalar(80, 80, 80), 1);
+    cv::circle(view, center, 4, cv::Scalar(0, 255, 255), -1);
+
+    float max_extent = 0.1F;
+    for (const auto& point : points) {
+        max_extent = std::max(max_extent, std::abs(point.x));
+        max_extent = std::max(max_extent, std::abs(point.y));
+    }
+    for (const auto& cube : cubes) {
+        if (!cube.valid) {
+            continue;
+        }
+
+        ++valid_cube_count;
+        max_extent = std::max(max_extent, std::abs(cube.center.x));
+        max_extent = std::max(max_extent, std::abs(cube.center.y));
+    }
+
+    const float usable_radius = static_cast<float>(std::max(1, image_size / 2 - kMargin));
+    const float scale = usable_radius / max_extent;
+
+    for (const auto& point : points) {
+        const int px = static_cast<int>(std::lround(center.x - point.y * scale));
+        const int py = static_cast<int>(std::lround(center.y + point.x * scale));
+
+        if (px >= 0 && px < image_size && py >= 0 && py < image_size) {
+            cv::circle(view, cv::Point(px, py), 1, cv::Scalar(0, 255, 0), -1);
+        }
+    }
+
+    for (const auto& cube : cubes) {
+        if (!cube.valid) {
+            continue;
+        }
+
+        const int px = static_cast<int>(std::lround(center.x - cube.center.y * scale));
+        const int py = static_cast<int>(std::lround(center.y + cube.center.x * scale));
+
+        if (px < 0 || px >= image_size || py < 0 || py >= image_size) {
+            continue;
+        }
+
+        const cv::Point cube_center(px, py);
+        cv::circle(view, cube_center, 2, cv::Scalar(0, 0, 255), -1);
+        cv::circle(view, cube_center, 3, cv::Scalar(0, 255, 255), 1);
+
+        std::ostringstream label_stream;
+        label_stream << std::fixed << std::setprecision(2)
+                     << "ID:" << cube.id
+                     << " (" << cube.center.x
+                     << ", " << cube.center.y
+                     << ", " << cube.center.z << ")";
+
+        const int label_x = std::max(10, std::min(px + 12, image_size - 220));
+        const int label_y = std::max(20, std::min(py - 12, image_size - 10));
+        const cv::Point label_origin(
+            label_x,
+            label_y);
+
+        cv::putText(
+            view,
+            label_stream.str(),
+            label_origin,
+            cv::FONT_HERSHEY_SIMPLEX,
+            0.45,
+            cv::Scalar(0, 220, 255),
+            1);
+    }
+
+    cv::putText(view, "FWD (-X)", cv::Point(center.x - 36, 20), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(200, 200, 200), 1);
+    cv::putText(view, "LEFT (+Y)", cv::Point(10, center.y - 8), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(200, 200, 200), 1);
+    cv::putText(view, "REAR (+X)", cv::Point(center.x - 40, image_size - 75), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(160, 160, 160), 1);
+    cv::putText(view, "RIGHT (-Y)", cv::Point(image_size - 92, center.y - 8), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(160, 160, 160), 1);
+    cv::putText(
+        view,
+        "Points: " + std::to_string(points.size()),
+        cv::Point(10, image_size - 30),
+        cv::FONT_HERSHEY_SIMPLEX,
+        0.6,
+        cv::Scalar(255, 255, 255),
+        1);
+    cv::putText(
+        view,
+        "Cubes: " + std::to_string(valid_cube_count),
+        cv::Point(10, image_size - 50),
+        cv::FONT_HERSHEY_SIMPLEX,
+        0.6,
+        cv::Scalar(0, 220, 255),
+        1);
+    cv::putText(
+        view,
+        "Scale: " + std::to_string(scale).substr(0, 5) + " px/m",
+        cv::Point(10, image_size - 10),
+        cv::FONT_HERSHEY_SIMPLEX,
+        0.5,
+        cv::Scalar(255, 255, 255),
+        1);
+
+    return view;
 }
 
 int main(int argc, char *argv[])

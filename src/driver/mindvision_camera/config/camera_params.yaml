@@ -8,7 +8,6 @@
     exposure_time: 10000
     flip_image: false
     gamma: 80
-    trigger_mode: 0
     rgb_gain:
       b: 100
       g: 120

@@ -5,6 +5,16 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
+option(CAR_CONTROL_ENABLE_NATIVE_OPTIMIZATION "Enable native CPU tuning for car_control" ON)
+
+if(POLICY CMP0069)
+  cmake_policy(SET CMP0069 NEW)
+endif()
+
 set(OpenCV_DIR /usr/local/lib/cmake/opencv4)
 
 # find dependencies
@@ -29,9 +39,28 @@ endif()
 add_executable(car_control src/car_control_node.cpp)
 ament_target_dependencies(car_control rclcpp sensor_msgs OpenCV)
 
+if(CAR_CONTROL_ENABLE_NATIVE_OPTIMIZATION AND NOT CMAKE_CROSSCOMPILING AND
+   CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(car_control PRIVATE -march=native -mtune=native)
+endif()
+
+include(CheckIPOSupported)
+check_ipo_supported(RESULT car_control_ipo_supported OUTPUT car_control_ipo_error)
+if(car_control_ipo_supported)
+  set_property(TARGET car_control PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+endif()
+
 install(TARGETS
   car_control
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY
+  config
+  launch
+  DESTINATION share/${PROJECT_NAME}
+  PATTERN "__pycache__" EXCLUDE
+  PATTERN "*.pyc" EXCLUDE
 )
 
 message(STATUS "OpenCV version: ${OpenCV_VERSION}")

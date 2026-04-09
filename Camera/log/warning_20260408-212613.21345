@@ -1,0 +1,5 @@
+Log file created at: 2026/04/08 21:26:13
+Running on machine: orangepi5ultra
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+W0408 21:26:13.292683 21361 MVCameraBase.cpp:99] Device:(name:lc_mv sn:042021420013)Lost
+W0408 21:26:27.172780 21361 MVCameraBase.cpp:119] Device:(name:lc_mv sn:042021420013)ReConnected, TolCount:1

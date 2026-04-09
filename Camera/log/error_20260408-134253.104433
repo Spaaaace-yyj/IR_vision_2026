@@ -1,0 +1,4 @@
+Log file created at: 2026/04/08 13:42:53
+Running on machine: orangepi5ultra
+Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
+E0408 13:42:53.592629 104433 MVCAMAPI.cpp:350] CameraInit Failed, err:-18,Version:2.1.0.32,FriendlyName:lc_mv,SN:042021420013

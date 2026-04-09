@@ -1,0 +1,30 @@
+<package format="3">
+<name>mvcc_camera_ros2</name>
+<version>0.0.0</version>
+<description>ros2 examples of MvCameraControlSDK</description>
+<maintainer email="xxx@gmail.com">xxx</maintainer>
+<license>TODO: License declaration</license>
+<buildtool_depend>ament_cmake</buildtool_depend>
+<build_depend>rclcpp</build_depend>
+<exec_depend>rclcpp</exec_depend>
+<depend>mvcc_camera_ros2_interface</depend>
+<build_depend>sensor_msgs</build_depend>
+<exec_depend>sensor_msgs</exec_depend>
+<build_depend>cv_bridge</build_depend>
+<exec_depend>cv_bridge</exec_depend>
+<build_depend>OpenCV</build_depend>
+<exec_depend>OpenCV</exec_depend>
+<build_depend>message_filters</build_depend>
+<exec_depend>message_filters</exec_depend>
+<build_depend>fmt</build_depend>
+<exec_depend>fmt</exec_depend>
+<build_depend>rcpputils</build_depend>
+<exec_depend>rcpputils</exec_depend>
+<build_depend>std_msgs</build_depend>
+<exec_depend>std_msgs</exec_depend>
+<test_depend>ament_lint_auto</test_depend>
+<test_depend>ament_lint_common</test_depend>
+<export>
+<build_type>ament_cmake</build_type>
+</export>
+</package>

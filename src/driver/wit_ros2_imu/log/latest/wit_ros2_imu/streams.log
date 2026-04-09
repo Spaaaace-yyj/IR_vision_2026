@@ -1,0 +1,23 @@
+[0.384s] Invoking command in '/home/spaaaaace/Code/imu_module/imu_ws/src/wit_ros2_imu': CONDA_PROMPT_MODIFIER=(vision) PYTHONPATH=/home/spaaaaace/Code/imu_module/imu_ws/src/wit_ros2_imu/build/wit_ros2_imu/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/spaaaaace/Code/imu_module/imu_ws/src/wit_ros2_imu/install/wit_ros2_imu/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base build/wit_ros2_imu build --build-base /home/spaaaaace/Code/imu_module/imu_ws/src/wit_ros2_imu/build/wit_ros2_imu/build install --record /home/spaaaaace/Code/imu_module/imu_ws/src/wit_ros2_imu/build/wit_ros2_imu/install.log --install-scripts $base/lib/wit_ros2_imu --single-version-externally-managed install_data
+[0.530s] /usr/lib/python3/dist-packages/setuptools/dist.py:723: UserWarning: Usage of dash-separated 'script-dir' will not be supported in future versions. Please use the underscore name 'script_dir' instead
+[0.530s]   warnings.warn(
+[0.535s] running egg_info
+[0.535s] writing build/wit_ros2_imu/wit_ros2_imu.egg-info/PKG-INFO
+[0.535s] writing dependency_links to build/wit_ros2_imu/wit_ros2_imu.egg-info/dependency_links.txt
+[0.535s] writing entry points to build/wit_ros2_imu/wit_ros2_imu.egg-info/entry_points.txt
+[0.536s] writing requirements to build/wit_ros2_imu/wit_ros2_imu.egg-info/requires.txt
+[0.536s] writing top-level names to build/wit_ros2_imu/wit_ros2_imu.egg-info/top_level.txt
+[0.536s] reading manifest file 'build/wit_ros2_imu/wit_ros2_imu.egg-info/SOURCES.txt'
+[0.537s] writing manifest file 'build/wit_ros2_imu/wit_ros2_imu.egg-info/SOURCES.txt'
+[0.537s] running build
+[0.537s] running build_py
+[0.537s] running install
+[0.537s] running install_lib
+[0.538s] running install_data
+[0.538s] running install_egg_info
+[0.539s] removing '/home/spaaaaace/Code/imu_module/imu_ws/src/wit_ros2_imu/install/wit_ros2_imu/lib/python3.10/site-packages/wit_ros2_imu-0.0.0-py3.10.egg-info' (and everything under it)
+[0.539s] Copying build/wit_ros2_imu/wit_ros2_imu.egg-info to /home/spaaaaace/Code/imu_module/imu_ws/src/wit_ros2_imu/install/wit_ros2_imu/lib/python3.10/site-packages/wit_ros2_imu-0.0.0-py3.10.egg-info
+[0.539s] running install_scripts
+[0.551s] Installing wit_ros2_imu script to /home/spaaaaace/Code/imu_module/imu_ws/src/wit_ros2_imu/install/wit_ros2_imu/lib/wit_ros2_imu
+[0.551s] writing list of installed files to '/home/spaaaaace/Code/imu_module/imu_ws/src/wit_ros2_imu/build/wit_ros2_imu/install.log'
+[0.565s] Invoked command in '/home/spaaaaace/Code/imu_module/imu_ws/src/wit_ros2_imu' returned '0': CONDA_PROMPT_MODIFIER=(vision) PYTHONPATH=/home/spaaaaace/Code/imu_module/imu_ws/src/wit_ros2_imu/build/wit_ros2_imu/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/spaaaaace/Code/imu_module/imu_ws/src/wit_ros2_imu/install/wit_ros2_imu/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base build/wit_ros2_imu build --build-base /home/spaaaaace/Code/imu_module/imu_ws/src/wit_ros2_imu/build/wit_ros2_imu/build install --record /home/spaaaaace/Code/imu_module/imu_ws/src/wit_ros2_imu/build/wit_ros2_imu/install.log --install-scripts $base/lib/wit_ros2_imu --single-version-externally-managed install_data

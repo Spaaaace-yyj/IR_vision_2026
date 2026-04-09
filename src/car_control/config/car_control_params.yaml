@@ -1,0 +1,10 @@
+/car_control_node:
+  ros__parameters:
+    tag_size: 0.08
+    cube_size: 0.15
+
+    camera_to_base.translation: [0.0, 0.0, 0.0]
+    camera_to_base.rpy: [1.5708, 0.0, -1.5708]
+
+    lidar_to_base.translation: [0.0, 0.0, 0.0]
+    lidar_to_base.rpy: [0.0, 0.0, 0.0]

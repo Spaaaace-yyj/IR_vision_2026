@@ -13,7 +13,6 @@
 #include <sensor_msgs/msg/image.hpp>
 
 // C++ system
-#include <atomic>
 #include <memory>
 #include <string>
 #include <thread>
@@ -57,55 +56,27 @@ public:
     // 获得相机的特性描述结构体。该结构体中包含了相机可设置的各种参数的范围信息。决定了相关函数的参数
     CameraGetCapability(h_camera_, &t_capability_);
 
+    // 直接使用vector的内存作为相机输出buffer
+    image_msg_.data.reserve(
+      t_capability_.sResolutionRange.iHeightMax * t_capability_.sResolutionRange.iWidthMax * 3);
+
     // 设置手动曝光
     CameraSetAeState(h_camera_, false);
 
     // 设置相机高速模式
     tSdkCameraCapbility pCameraInfo;
     CameraGetCapability(h_camera_, &pCameraInfo);
-    int frame_speed_index = pCameraInfo.iFrameSpeedDesc > 0 ? pCameraInfo.iFrameSpeedDesc - 1 : 0;
-    i_status = CameraSetFrameSpeed(h_camera_, frame_speed_index);
-    if (i_status != CAMERA_STATUS_SUCCESS) {
-      RCLCPP_WARN(
-        this->get_logger(), "Failed to set frame speed index = %d, status = %d",
-        frame_speed_index, i_status);
-    } else {
-      RCLCPP_INFO(this->get_logger(), "Frame speed index = %d", frame_speed_index);
-    }
+    CameraSetFrameSpeed(h_camera_, pCameraInfo.iFrameSpeedDesc);
 
     // Declare camera parameters
     declareParameters();
 
-    int trigger_mode = -1;
-    i_status = CameraGetTriggerMode(h_camera_, &trigger_mode);
-    if (i_status == CAMERA_STATUS_SUCCESS) {
-      RCLCPP_INFO(this->get_logger(), "Current trigger mode = %d", trigger_mode);
-    } else {
-      RCLCPP_WARN(this->get_logger(), "Failed to get trigger mode, status = %d", i_status);
-    }
-
-    trigger_mode_ = this->declare_parameter("trigger_mode", static_cast<int>(CONTINUATION));
-    i_status = CameraSetTriggerMode(h_camera_, trigger_mode_);
-    if (i_status != CAMERA_STATUS_SUCCESS) {
-      RCLCPP_ERROR(this->get_logger(), "Failed to set trigger mode = %d, status = %d", trigger_mode_, i_status);
-      return;
-    }
-    RCLCPP_INFO(this->get_logger(), "Configured trigger mode = %d", trigger_mode_);
-
     // 让SDK进入工作模式，开始接收来自相机发送的图像
     // 数据。如果当前相机是触发模式，则需要接收到
     // 触发帧以后才会更新图像。
-    i_status = CameraPlay(h_camera_);
-    if (i_status != CAMERA_STATUS_SUCCESS) {
-      RCLCPP_ERROR(this->get_logger(), "CameraPlay failed, status = %d", i_status);
-      return;
-    }
+    CameraPlay(h_camera_);
 
-    i_status = CameraSetIspOutFormat(h_camera_, CAMERA_MEDIA_TYPE_RGB8);
-    if (i_status != CAMERA_STATUS_SUCCESS) {
-      RCLCPP_ERROR(this->get_logger(), "CameraSetIspOutFormat failed, status = %d", i_status);
-      return;
-    }
+    CameraSetIspOutFormat(h_camera_, CAMERA_MEDIA_TYPE_RGB8);
 
     // Create camera publisher
     // rqt_image_view can't subscribe image msg with sensor_data QoS
@@ -134,23 +105,24 @@ public:
     capture_thread_ = std::thread{[this]() -> void {
       RCLCPP_INFO(this->get_logger(), "Publishing image!");
 
-      camera_info_msg_.header.frame_id = image_msg_.header.frame_id = frame_id_;
+      camera_info_msg_.header.frame_id = image_msg_.header.frame_id = "camera_optical_frame";
       image_msg_.encoding = "rgb8";
-      const bool debug_ = true;
+
+      bool debug_ = true;
 
       while (rclcpp::ok()) {
-        auto status = CameraGetImageBuffer(h_camera_, &s_frame_info_, &pby_buffer_, 1000);
-        if (status == CAMERA_STATUS_SUCCESS) {
-          image_msg_.height = s_frame_info_.iHeight;
-          image_msg_.width = s_frame_info_.iWidth;
-          image_msg_.step = s_frame_info_.iWidth * 3;
-          image_msg_.data.resize(s_frame_info_.iWidth * s_frame_info_.iHeight * 3);
-
+        if (
+          CameraGetImageBuffer(h_camera_, &s_frame_info_, &pby_buffer_, 1000) ==
+          CAMERA_STATUS_SUCCESS) {
           CameraImageProcess(h_camera_, pby_buffer_, image_msg_.data.data(), &s_frame_info_);
           if (flip_image_) {
             CameraFlipFrameBuffer(image_msg_.data.data(), &s_frame_info_, 3);
           }
           camera_info_msg_.header.stamp = image_msg_.header.stamp = this->now();
+          image_msg_.height = s_frame_info_.iHeight;
+          image_msg_.width = s_frame_info_.iWidth;
+          image_msg_.step = s_frame_info_.iWidth * 3;
+          image_msg_.data.resize(s_frame_info_.iWidth * s_frame_info_.iHeight * 3);
 
           camera_pub_.publish(image_msg_, camera_info_msg_);
 
@@ -169,18 +141,6 @@ public:
             }
             fps ++ ;
           }
-        } else if (status == CAMERA_STATUS_TIME_OUT) {
-          if (!capture_timeout_logged_.exchange(true)) {
-            RCLCPP_WARN(
-              this->get_logger(),
-              "CameraGetImageBuffer timed out. No frame received within 1000 ms. "
-              "This usually means the camera is still in trigger mode or not streaming.");
-          }
-        } else {
-          capture_timeout_logged_.store(false);
-          RCLCPP_ERROR_THROTTLE(
-            this->get_logger(), *this->get_clock(), 2000,
-            "CameraGetImageBuffer failed, status = %d", status);
         }
       }
     }};
@@ -269,9 +229,6 @@ private:
 
     // Flip
     flip_image_ = this->declare_parameter("flip_image", false);
-
-    // Frame id
-    frame_id_ = this->declare_parameter("frame_id", "camera_optical_frame");
   }
 
   rcl_interfaces::msg::SetParametersResult parametersCallback(
@@ -349,9 +306,6 @@ private:
   int r_gain_, g_gain_, b_gain_;
 
   bool flip_image_;
-  int trigger_mode_;
-  std::string frame_id_;
-  std::atomic_bool capture_timeout_logged_{false};
 
   std::string camera_name_;
   std::unique_ptr<camera_info_manager::CameraInfoManager> camera_info_manager_;

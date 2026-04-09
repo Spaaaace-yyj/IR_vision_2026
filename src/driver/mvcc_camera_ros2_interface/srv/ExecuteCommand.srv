@@ -1,0 +1,6 @@
+# 命令请求
+string str_key
+---
+# 命令响应
+bool success                # success or not
+string message              # status message

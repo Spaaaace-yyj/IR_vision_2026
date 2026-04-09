@@ -1,0 +1,30 @@
+/camera_mount_calibration_node:
+  ros__parameters:
+    camera_id: 1
+    frame_width: 1280
+    frame_height: 720
+    frame_fps: 30
+    timer_period_ms: 33
+
+    show_debug_view: true
+    use_find_chessboard_sb: false
+    use_tracking_roi: true
+    flip_image: false
+    stable_detection_count: 5
+    max_tracking_misses: 5
+    detection_scale: 0.5
+    tracking_roi_padding_ratio: 0.25
+
+    # Chessboard inner corner count.
+    board_cols: 7
+    board_rows: 11
+    square_size: 0.02
+    axis_length: 0.08
+
+    # Replace with your real camera intrinsics if different.
+    camera_matrix:
+      [504.504779, 0.0, 647.473284,
+       0.0, 502.266322, 363.157317,
+       0.0, 0.0, 1.0]
+
+    dist_coeffs: [0.003130, 0.002283, 0.001391, 0.001827, 0.0]
