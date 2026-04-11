@@ -4,7 +4,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
-// #include "cv_bridge/cv_bridge.h"
+#include "cv_bridge/cv_bridge.h"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
@@ -15,6 +15,7 @@
 #include <thread>
 #include <unordered_map>
 #include <vector>
+#include <atomic>
 
 struct TagPose {
     int id;
@@ -43,7 +44,7 @@ class CarControlNode : public rclcpp::Node
 public:
         CarControlNode();
 
-        void imageCallback();
+        void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);
 
         std::unordered_map<int, std::vector<int>> groupById(
             const std::vector<int>& ids);
@@ -111,12 +112,16 @@ private:
 private:
         cv::VideoCapture cap_;
         rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_publisher_;
+        rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr scan_image_publisher_;
+
         rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_subscription_;
+        rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
         rclcpp::TimerBase::SharedPtr image_timer_;
 
         //debug线程
         std::mutex img_mutex_;
         cv::Mat latest_frame_;
+        std::atomic<bool> new_frame_{false};
 
         std::vector<CubeState> cubes_;
         std::vector<CubeState> cubes_base_;
@@ -125,6 +130,8 @@ private:
         std::thread show_thread_;
 
         std::thread control_thread_;
+
+        bool debug_mode_ = true;
 
 };
 

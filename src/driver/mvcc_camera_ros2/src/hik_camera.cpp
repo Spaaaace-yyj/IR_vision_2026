@@ -34,11 +34,25 @@
 #define CAMERA_LOG_INFO(format, ...) \
     RCLCPP_INFO(rclcpp::get_logger("HikCamera"), "[%s] " format, __FUNCTION__, ##__VA_ARGS__)
 
+#define CAMERA_LOG_DEBUG(format, ...) \
+    RCLCPP_DEBUG(rclcpp::get_logger("HikCamera"), "[%s] " format, __FUNCTION__, ##__VA_ARGS__)
+
 #define CAMERA_LOG_WARN(format, ...) \
     RCLCPP_WARN(rclcpp::get_logger("HikCamera"), "[%s] " format, __FUNCTION__, ##__VA_ARGS__)
 
 #define CAMERA_LOG_ERROR(format, ...) \
     RCLCPP_ERROR(rclcpp::get_logger("HikCamera"), "[%s:%d] " format, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+
+namespace {
+
+bool isInternalRosParameter(const std::string& param_name)
+{
+    return param_name == "cam_sn" ||
+           param_name == "use_sim_time" ||
+           param_name.rfind("qos_overrides.", 0) == 0;
+}
+
+}  // namespace
 
 
     
@@ -527,8 +541,14 @@ void HikCamera::InnerImageCallbackProc(unsigned char * pData, MV_FRAME_OUT_INFO_
 
     int nRet = MV_OK;
 
-    CAMERA_LOG_INFO("Recv Image Frame Number [%d] nExtendWidth[%d] nExtendHeight[%d] nFrameLenEx[%d] nFrameLen[%d] enPixelType[%#x]",
-    pFrameInfo->nFrameNum, pFrameInfo->nExtendWidth, pFrameInfo->nExtendHeight, pFrameInfo->nFrameLenEx, pFrameInfo->nFrameLen, pFrameInfo->enPixelType);
+    CAMERA_LOG_DEBUG(
+        "Recv Image Frame Number [%u] nExtendWidth[%u] nExtendHeight[%u] nFrameLenEx[%llu] nFrameLen[%u] enPixelType[%#x]",
+        static_cast<unsigned int>(pFrameInfo->nFrameNum),
+        static_cast<unsigned int>(pFrameInfo->nExtendWidth),
+        static_cast<unsigned int>(pFrameInfo->nExtendHeight),
+        static_cast<unsigned long long>(pFrameInfo->nFrameLenEx),
+        static_cast<unsigned int>(pFrameInfo->nFrameLen),
+        static_cast<unsigned int>(pFrameInfo->enPixelType));
 
 
     MVCC_ROS2_IMAGE_PROC_OUT stOut;
@@ -542,7 +562,7 @@ void HikCamera::InnerImageCallbackProc(unsigned char * pData, MV_FRAME_OUT_INFO_
         return;
     }
     
-    CAMERA_LOG_INFO("InnerImageCallbackProc imageDecodeAndConvertProcess success");
+    CAMERA_LOG_DEBUG("InnerImageCallbackProc imageDecodeAndConvertProcess success");
 
     // 如果有扩展回调函数，则调用扩展回调函数
     {
@@ -578,11 +598,11 @@ void HikCamera::InnerImageCallbackProc(unsigned char * pData, MV_FRAME_OUT_INFO_
 
             frameOut.nFrameLenEx = stOut.nBufLen;
 
-            CAMERA_LOG_INFO("extended_image_callback_ begin");
+            CAMERA_LOG_DEBUG("extended_image_callback_ begin");
             // 调用扩展回调函数，传入帧信息
             extended_image_callback_(stOut.pBufAddr, &frameOut, extended_user_);
 
-            CAMERA_LOG_INFO("extended_image_callback_ end");
+            CAMERA_LOG_DEBUG("extended_image_callback_ end");
         }
     }
 }
@@ -662,7 +682,7 @@ int HikCamera::setCameraParameter(const char* chNode, MVCC_ROS2_NODE_Param* pstN
                 return nRet;
             }
 
-            CAMERA_LOG_INFO("Current [%s]: %ld, Min: %ld, Max: %ld", 
+            CAMERA_LOG_DEBUG("Current [%s]: %ld, Min: %ld, Max: %ld", 
                        chNode, stIntValue.nCurValue, stIntValue.nMin, stIntValue.nMax);
 
             // 检查参数值是否在有效范围内
@@ -671,7 +691,7 @@ int HikCamera::setCameraParameter(const char* chNode, MVCC_ROS2_NODE_Param* pstN
             nRet = MV_CC_SetIntValueEx(handle_, chNode, pstNodeParam->value.intValue);
             if (MV_OK == nRet) 
             {
-                CAMERA_LOG_INFO("Set [%s] to %lld successfully", chNode, (long long)pstNodeParam->value.intValue);
+                CAMERA_LOG_DEBUG("Set [%s] to %lld successfully", chNode, (long long)pstNodeParam->value.intValue);
             } 
             else 
             {
@@ -697,7 +717,7 @@ int HikCamera::setCameraParameter(const char* chNode, MVCC_ROS2_NODE_Param* pstN
                 return nRet;
             }
 
-            CAMERA_LOG_INFO("Current [%s]: %f, Min: %f, Max: %f", 
+            CAMERA_LOG_DEBUG("Current [%s]: %f, Min: %f, Max: %f", 
                        chNode, stFloatValue.fCurValue, stFloatValue.fMin, stFloatValue.fMax);
 
             // 检查参数值是否在有效范围内
@@ -706,7 +726,7 @@ int HikCamera::setCameraParameter(const char* chNode, MVCC_ROS2_NODE_Param* pstN
                 nRet = MV_CC_SetFloatValue(handle_, chNode, pstNodeParam->value.floatValue);
                 if (MV_OK == nRet) 
                 {
-                    CAMERA_LOG_INFO("Set [%s] to %f successfully", chNode, pstNodeParam->value.floatValue);
+                    CAMERA_LOG_DEBUG("Set [%s] to %f successfully", chNode, pstNodeParam->value.floatValue);
                 } 
                 else
                  {
@@ -726,7 +746,7 @@ int HikCamera::setCameraParameter(const char* chNode, MVCC_ROS2_NODE_Param* pstN
             nRet = MV_CC_SetBoolValue(handle_, chNode, pstNodeParam->value.boolValue);
             if (MV_OK == nRet) 
             {
-                CAMERA_LOG_INFO("Set [%s] to %s successfully", 
+                CAMERA_LOG_DEBUG("Set [%s] to %s successfully", 
                            chNode, pstNodeParam->value.boolValue ? "true" : "false");
             } 
             else
@@ -741,7 +761,7 @@ int HikCamera::setCameraParameter(const char* chNode, MVCC_ROS2_NODE_Param* pstN
             nRet = MV_CC_SetCommandValue(handle_, chNode);
             if (MV_OK == nRet) 
             {
-                CAMERA_LOG_INFO("Execute [%s] command successfully", chNode);
+                CAMERA_LOG_DEBUG("Execute [%s] command successfully", chNode);
             } 
             else
             {
@@ -754,7 +774,7 @@ int HikCamera::setCameraParameter(const char* chNode, MVCC_ROS2_NODE_Param* pstN
             nRet = MV_CC_SetStringValue(handle_, chNode, pstNodeParam->value.szStringValue);
             if (MV_OK == nRet) 
             {
-                CAMERA_LOG_INFO("Set [%s] to %s successfully", 
+                CAMERA_LOG_DEBUG("Set [%s] to %s successfully", 
                            chNode, pstNodeParam->value.szStringValue);
             } 
             else
@@ -769,7 +789,7 @@ int HikCamera::setCameraParameter(const char* chNode, MVCC_ROS2_NODE_Param* pstN
             nRet = MV_CC_SetEnumValueByString(handle_, chNode, pstNodeParam->value.szStringValue);
             if (MV_OK == nRet) 
             {
-                CAMERA_LOG_INFO("Set [%s] to %s successfully", 
+                CAMERA_LOG_DEBUG("Set [%s] to %s successfully", 
                            chNode, pstNodeParam->value.szStringValue);
             } 
             else
@@ -963,12 +983,12 @@ int HikCamera::setCameraParameterbyString(const std::string& param_name, const s
     int nRet = MV_OK;
     MVCC_ROS2_NODE_Param stParam ;
     
-    CAMERA_LOG_INFO("setCameraParameterbyString  param_name [%s] begin.",param_name.c_str());
+    CAMERA_LOG_DEBUG("setCameraParameterbyString  param_name [%s] begin.",param_name.c_str());
 
     // 跳过cam_sn参数，因为它在ImagePublish构造函数中已经处理过了
-    if (param_name == "cam_sn") 
+    if (isInternalRosParameter(param_name))
     {
-        CAMERA_LOG_INFO( "Skipping cam_sn parameter as it's handled in ImagePublish constructor. ");
+        CAMERA_LOG_DEBUG("Skipping internal ROS parameter [%s].", param_name.c_str());
         return -1;
     }
 
@@ -977,7 +997,7 @@ int HikCamera::setCameraParameterbyString(const std::string& param_name, const s
     int xmlRet = MV_XML_GetNodeInterfaceType(handle_, param_name.c_str(), &interfaceType);
     if (MV_OK != xmlRet) {
         // 参数在相机中不存在，跳过
-        CAMERA_LOG_WARN( "Parameter/node [%s] not found in camera, skipping.", param_name.c_str());
+        CAMERA_LOG_DEBUG("Parameter/node [%s] not found in camera, skipping.", param_name.c_str());
         return -1;
     }
     
@@ -994,7 +1014,7 @@ int HikCamera::setCameraParameterbyString(const std::string& param_name, const s
                 // 整型参数
                 stParam.type = MVCC_ROS2_NODE_INT;
                 stParam.value.intValue = std::stoll(value);
-                CAMERA_LOG_INFO("Parameter [%s] is integer type with value [%lld]", param_name.c_str(), stParam.value.intValue );
+                CAMERA_LOG_DEBUG("Parameter [%s] is integer type with value [%lld]", param_name.c_str(), stParam.value.intValue );
                 break;
             }
             case IFT_IFloat:
@@ -1002,7 +1022,7 @@ int HikCamera::setCameraParameterbyString(const std::string& param_name, const s
                 // 浮点型参数
                 stParam.type = MVCC_ROS2_NODE_FLOAT;
                 stParam.value.floatValue = std::stof(value);
-                CAMERA_LOG_INFO("Parameter [%s] is float type with value [%f]", param_name.c_str(), stParam.value.floatValue);
+                CAMERA_LOG_DEBUG("Parameter [%s] is float type with value [%f]", param_name.c_str(), stParam.value.floatValue);
                 break;
             }
             case IFT_IBoolean:
@@ -1010,7 +1030,7 @@ int HikCamera::setCameraParameterbyString(const std::string& param_name, const s
                 // 布尔型参数
                 stParam.type = MVCC_ROS2_NODE_BOOL;
                 stParam.value.boolValue = string_to_bool(value);
-                CAMERA_LOG_INFO( "Parameter [%s] is boolean type with value [%s]", param_name.c_str(), stParam.value.boolValue ? "true" : "false");
+                CAMERA_LOG_DEBUG("Parameter [%s] is boolean type with value [%s]", param_name.c_str(), stParam.value.boolValue ? "true" : "false");
                 break;
             }
             case IFT_IEnumeration:
@@ -1019,7 +1039,7 @@ int HikCamera::setCameraParameterbyString(const std::string& param_name, const s
                 stParam.type = MVCC_ROS2_NODE_ENUM;
                 strncpy(stParam.value.szStringValue, value.c_str(), sizeof(stParam.value.szStringValue) - 1);
                 stParam.value.szStringValue[sizeof(stParam.value.szStringValue) - 1] = '\0'; // 确保字符串以null结尾
-                CAMERA_LOG_INFO("Parameter [%s] is enum type with value [%s]", param_name.c_str(), stParam.value.szStringValue);
+                CAMERA_LOG_DEBUG("Parameter [%s] is enum type with value [%s]", param_name.c_str(), stParam.value.szStringValue);
                 break;
             }
             case IFT_IString:
@@ -1028,7 +1048,7 @@ int HikCamera::setCameraParameterbyString(const std::string& param_name, const s
                 stParam.type = MVCC_ROS2_NODE_STRING;
                 strncpy(stParam.value.szStringValue, value.c_str(), sizeof(stParam.value.szStringValue) - 1);
                 stParam.value.szStringValue[sizeof(stParam.value.szStringValue) - 1] = '\0'; // 确保字符串以null结尾
-                CAMERA_LOG_INFO("Parameter [%s] is string type with value [%s]", param_name.c_str(), stParam.value.szStringValue);
+                CAMERA_LOG_DEBUG("Parameter [%s] is string type with value [%s]", param_name.c_str(), stParam.value.szStringValue);
                 break;
             }
             default:
@@ -1047,7 +1067,7 @@ int HikCamera::setCameraParameterbyString(const std::string& param_name, const s
             return nRet;
         }
         
-        CAMERA_LOG_INFO("setCameraParameter [%s] success.", param_name.c_str());
+        CAMERA_LOG_DEBUG("setCameraParameter [%s] success.", param_name.c_str());
     }
     catch (const std::exception& e) 
     {
@@ -1055,7 +1075,7 @@ int HikCamera::setCameraParameterbyString(const std::string& param_name, const s
         return -1;
     }
     
-    CAMERA_LOG_INFO("Finished processing camera parameters.");
+    CAMERA_LOG_DEBUG("Finished processing camera parameters.");
     return nRet;
 }
 
@@ -1234,7 +1254,7 @@ int HikCamera::imageDecodeAndConvertProcess(unsigned char * pData, MV_FRAME_OUT_
         stDecodeParam.pDstBuf = hb_decode_buffer_;
         stDecodeParam.nDstBufSize = hb_decode_buffer_len_;
         
-        CAMERA_LOG_INFO( "before MV_CC_HB_Decode  nSrcLen %d  stDecodeParam.nDstBufSize  %d ", stDecodeParam.nSrcLen, stDecodeParam.nDstBufSize);
+        CAMERA_LOG_DEBUG("before MV_CC_HB_Decode  nSrcLen %d  stDecodeParam.nDstBufSize  %d ", stDecodeParam.nSrcLen, stDecodeParam.nDstBufSize);
 
         nRet = MV_CC_HB_Decode(handle_, &stDecodeParam);
         if(MV_OK != nRet)
@@ -1242,7 +1262,7 @@ int HikCamera::imageDecodeAndConvertProcess(unsigned char * pData, MV_FRAME_OUT_
             CAMERA_LOG_ERROR("MV_CC_HB_Decode failed, error: 0x%x", nRet);
             return nRet;
         }
-        CAMERA_LOG_INFO("Decode success from [0x%x] to [%#x] ", static_cast<unsigned int>(pFrameInfo->enPixelType), static_cast<unsigned int>(stDecodeParam.enDstPixelType));
+        CAMERA_LOG_DEBUG("Decode success from [0x%x] to [%#x] ", static_cast<unsigned int>(pFrameInfo->enPixelType), static_cast<unsigned int>(stDecodeParam.enDstPixelType));
 
 
         //保存图像, 仅存图标识使能后保存
@@ -1325,7 +1345,7 @@ int HikCamera::imageDecodeAndConvertProcess(unsigned char * pData, MV_FRAME_OUT_
         convert_buffer_len_ = nConvertBufferLenTmp;
     }
 
-    if(convert_buffer_len_ < nConvertBufferLenTmp)
+    if(convert_buffer_len_ < static_cast<uint64_t>(nConvertBufferLenTmp))
     {
         delete[] convert_buffer_;
         convert_buffer_ = new unsigned char[nConvertBufferLenTmp];
@@ -1347,7 +1367,10 @@ int HikCamera::imageDecodeAndConvertProcess(unsigned char * pData, MV_FRAME_OUT_
         return nRet;
     }
 
-    CAMERA_LOG_INFO("ConvertPixelType from [%#x] to [%#x] success .",stConvertParam.enSrcPixelType, stConvertParam.enDstPixelType);
+    CAMERA_LOG_DEBUG(
+        "ConvertPixelType from [%#x] to [%#x] success .",
+        static_cast<unsigned int>(stConvertParam.enSrcPixelType),
+        static_cast<unsigned int>(stConvertParam.enDstPixelType));
 
 
     // 保存转换后的数据 (调试标记使能后, 保存)
@@ -1397,7 +1420,7 @@ int HikCamera::imageDecodingProcess(MVCC_ROS2_IMAGE_DECODE_INOUT*  pimageinfo)
             hb_decode_buffer_len_ = nNeedLenTmp;
         }
 
-        if(hb_decode_buffer_len_ < static_cast<int64_t>(nNeedLenTmp))
+        if(hb_decode_buffer_len_ < nNeedLenTmp)
         {
             delete[] hb_decode_buffer_;
             hb_decode_buffer_ = new unsigned char[nNeedLenTmp * 3];
@@ -1423,7 +1446,7 @@ int HikCamera::imageDecodingProcess(MVCC_ROS2_IMAGE_DECODE_INOUT*  pimageinfo)
             CAMERA_LOG_ERROR("MV_CC_HB_Decode failed, error: 0x%x", nRet);
             return nRet;
         }
-        CAMERA_LOG_INFO("Decode success from [0x%x] to [%#x] ", static_cast<unsigned int>(pimageinfo->enPixelType), static_cast<unsigned int>(stDecodeParam.enDstPixelType));
+        CAMERA_LOG_DEBUG("Decode success from [0x%x] to [%#x] ", static_cast<unsigned int>(pimageinfo->enPixelType), static_cast<unsigned int>(stDecodeParam.enDstPixelType));
 
         //更新输出图像信息
         pimageinfo->enDestPixelType = stDecodeParam.enDstPixelType;
@@ -1502,7 +1525,10 @@ int HikCamera::imageConvertProcess(MVCC_ROS2_IMAGE_CONVERT_INOUT*  pimageinfo)
         return nRet;
     }
 
-    CAMERA_LOG_INFO("MV_CC_ConvertPixelTypeEx success from [0x%x] to [%#x.",stConvertParam.enSrcPixelType, stConvertParam.enDstPixelType);
+    CAMERA_LOG_DEBUG(
+        "MV_CC_ConvertPixelTypeEx success from [0x%x] to [%#x].",
+        static_cast<unsigned int>(stConvertParam.enSrcPixelType),
+        static_cast<unsigned int>(stConvertParam.enDstPixelType));
 
     //输出赋值
     pimageinfo->pBufAddr = stConvertParam.pDstBuffer ;

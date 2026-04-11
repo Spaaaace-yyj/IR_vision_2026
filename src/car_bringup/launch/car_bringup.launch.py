@@ -6,8 +6,10 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
 
 
 def generate_launch_description():
@@ -26,6 +28,11 @@ def generate_launch_description():
         "launch",
         "rplidar_a3_launch.py",
     )
+    hik_camera_default_params = os.path.join(
+        get_package_share_directory("mvcc_camera_ros2"),
+        "config",
+        "hik_camera_config.yaml",
+    )
 
     car_control_params_file = LaunchConfiguration("car_control_params_file")
     lidar_channel_type = LaunchConfiguration("lidar_channel_type")
@@ -35,6 +42,9 @@ def generate_launch_description():
     lidar_inverted = LaunchConfiguration("lidar_inverted")
     lidar_angle_compensate = LaunchConfiguration("lidar_angle_compensate")
     lidar_scan_mode = LaunchConfiguration("lidar_scan_mode")
+    enable_camera = LaunchConfiguration("enable_camera")
+    camera_params_file = LaunchConfiguration("camera_params_file")
+    camera_log_level = LaunchConfiguration("camera_log_level")
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -77,6 +87,21 @@ def generate_launch_description():
             default_value="Sensitivity",
             description="RPLIDAR scan mode",
         ),
+        DeclareLaunchArgument(
+            "enable_camera",
+            default_value="true",
+            description="Whether to start the Hikrobot MVCC camera publisher",
+        ),
+        DeclareLaunchArgument(
+            "camera_params_file",
+            default_value=hik_camera_default_params,
+            description="Path to the ROS 2 parameters file for the Hikrobot camera",
+        ),
+        DeclareLaunchArgument(
+            "camera_log_level",
+            default_value="info",
+            description="ROS log level for the Hikrobot camera publisher",
+        ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(car_control_launch),
             launch_arguments={
@@ -94,5 +119,14 @@ def generate_launch_description():
                 "angle_compensate": lidar_angle_compensate,
                 "scan_mode": lidar_scan_mode,
             }.items(),
+        ),
+        Node(
+            package="mvcc_camera_ros2",
+            executable="hik_camera_image_pub",
+            name="mvcc_camera_image_publisher",
+            output="screen",
+            condition=IfCondition(enable_camera),
+            parameters=[camera_params_file],
+            arguments=["--ros-args", "--log-level", camera_log_level],
         ),
     ])

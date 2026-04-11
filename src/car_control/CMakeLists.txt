@@ -21,7 +21,7 @@ set(OpenCV_DIR /usr/local/lib/cmake/opencv4)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(OpenCV REQUIRED)
-# find_package(cv_bridge REQUIRED)
+find_package(cv_bridge REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
 if(BUILD_TESTING)
@@ -37,7 +37,7 @@ if(BUILD_TESTING)
 endif()
 
 add_executable(car_control src/car_control_node.cpp)
-ament_target_dependencies(car_control rclcpp sensor_msgs OpenCV)
+ament_target_dependencies(car_control rclcpp sensor_msgs OpenCV cv_bridge)
 
 if(CAR_CONTROL_ENABLE_NATIVE_OPTIMIZATION AND NOT CMAKE_CROSSCOMPILING AND
    CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

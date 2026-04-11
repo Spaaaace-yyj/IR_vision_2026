@@ -9,14 +9,24 @@ CarControlNode::CarControlNode() : Node("car_control_node")
 {
     //打开摄像头
     // cap_.open(1, cv::CAP_V4L2);
-    cap_.open(1);
-    if(!cap_.isOpened()){
-        RCLCPP_ERROR(this->get_logger(), "Cannot open camera");
-        return; 
-    }
+    // cap_.open(1);
+    // if(!cap_.isOpened()){
+    //     RCLCPP_ERROR(this->get_logger(), "Cannot open camera");
+    //     return; 
+    // }
 
-    image_timer_ = this->create_wall_timer(33ms, std::bind(&CarControlNode::imageCallback, this));
+    rclcpp::SensorDataQoS qos;
+    qos.keep_last(10);
+
+    image_sub_ = this->create_subscription<sensor_msgs::msg::Image>(
+            "/mvcc_camera/Image", 3,
+            std::bind(&CarControlNode::imageCallback, this, std::placeholders::_1));
+
+    // image_timer_ = this->create_wall_timer(33ms, std::bind(&CarControlNode::imageCallback, this));
     image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/car_control/image_debug", rclcpp::SensorDataQoS());
+    
+    scan_image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/car_control/scan_debug", rclcpp::SensorDataQoS());
+    
     scan_subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
         "/scan",
         rclcpp::SensorDataQoS(),
@@ -61,18 +71,25 @@ CarControlNode::CarControlNode() : Node("car_control_node")
     tag_def_point.emplace_back(cv::Point3f(half_len, -half_len, 0));
     tag_def_point.emplace_back(cv::Point3f(-half_len, -half_len, 0));
 
+    // camera_matrix_ = (cv::Mat_<double>(3,3) << 
+    //     504.504779, 0, 647.473284,
+    //     0, 502.266322, 363.157317,
+    //     0, 0, 1);
+
+    // dist_coeffs_ = (cv::Mat_<double>(1,5) << 0.003130, 0.002283, 0.001391, 0.001827, 0.0);
+
     camera_matrix_ = (cv::Mat_<double>(3,3) << 
-        504.504779, 0, 647.473284,
-        0, 502.266322, 363.157317,
+        1313.547983, 0, 644.967972,
+        0, 1306.233527, 490.556913,
         0, 0, 1);
 
-    dist_coeffs_ = (cv::Mat_<double>(1,5) << 0.003130, 0.002283, 0.001391, 0.001827, 0.0);
-
+    dist_coeffs_ = (cv::Mat_<double>(1,5) << -0.077092, 0.194505, 0.001818, 0.000257, 0.0);
     RCLCPP_INFO(this->get_logger(), "Success Init Car Control node!");
 }
 
-void CarControlNode::imageCallback()
+void CarControlNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
+
     static int fps = 0;
     static auto start_time = this->now();
     auto t0 = this->now();
@@ -85,8 +102,20 @@ void CarControlNode::imageCallback()
     fps++;
 
     cv::Mat frame;
-    cap_.grab();
-    cap_.retrieve(frame);
+    try{
+        // 转换为 cv::Mat
+        auto cv_ptr = cv_bridge::toCvShare(msg, "bgr8");
+        frame = cv_ptr->image;
+    }
+    catch (cv_bridge::Exception &e)
+    {
+        RCLCPP_ERROR(this->get_logger(),
+                     "cv_bridge exception: %s", e.what());
+    }
+
+
+    // cap_.grab();
+    // cap_.retrieve(frame);
 
     if (frame.empty()) {
         RCLCPP_WARN(this->get_logger(), "Empty frame");
@@ -95,7 +124,15 @@ void CarControlNode::imageCallback()
 
     cv::Mat gray, bin;
     cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
+    cv::medianBlur(gray, gray, 3);
     cv::threshold(gray, bin, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3,3));
+    cv::morphologyEx(bin, bin, cv::MORPH_OPEN, kernel);
+    cv::morphologyEx(bin, bin, cv::MORPH_CLOSE, kernel);
+
+    // cv::imshow("Binary", bin);
+    // cv::waitKey(1);
     
     std::vector<int> marker_ids;
     std::vector<std::vector<cv::Point2f>> marker_corners;
@@ -249,9 +286,11 @@ void CarControlNode::imageCallback()
         cv::Scalar(0,255,0),
         2);
 
+    if(debug_mode_)
     {
         std::lock_guard<std::mutex> lock(img_mutex_);
-        latest_frame_ = frame.clone();
+        latest_frame_ = frame;
+        new_frame_ = true;
         cubes_ = cubes;
         cubes_base_ = cubes_base;
     }
@@ -259,37 +298,39 @@ void CarControlNode::imageCallback()
 
 void CarControlNode::debugThread()
 {
+    cv::Mat img;
+    std::vector<CubeState> cubes;
+    std::vector<CubeState> cubes_base;
+    std::vector<cv::Point3f> laser_points_base;
     while (rclcpp::ok())
     {
-        cv::Mat img;
-        std::vector<CubeState> cubes;
-        std::vector<CubeState> cubes_base;
-        std::vector<cv::Point3f> laser_points_base;
-
-        {
-            std::lock_guard<std::mutex> lock(img_mutex_);
-
-            if (!latest_frame_.empty()) {
-                img = latest_frame_.clone();
+        if(new_frame_ && debug_mode_){
+            {
+                std::lock_guard<std::mutex> lock(img_mutex_);
+            
+                if (!latest_frame_.empty()) {
+                    img = latest_frame_.clone();
+                    new_frame_ = false;
+                }
+                cubes = cubes_;
+                cubes_base = cubes_base_;
+                laser_points_base = laser_points_base_;
             }
-            cubes = cubes_;
-            cubes_base = cubes_base_;
-            laser_points_base = laser_points_base_;
+        
+            if (!img.empty()) {
+                int image_width = img.cols;
+                int image_height = img.rows;
+                drawCubes(img, cubes, camera_matrix_, dist_coeffs_);
+                cv::line(img, cv::Point(image_width / 2, 0), cv::Point(image_width / 2, image_height), cv::Scalar(255,255,255), 1);
+                cv::line(img, cv::Point(0, image_height / 2), cv::Point(image_width, image_height / 2), cv::Scalar(255,255,255), 1);
+                cv::circle(img, cv::Point(image_width / 2, image_height / 2), 15, cv::Scalar(100,255,100), 1);
+                cv::imshow("Camera", img);
+            }
+        
+            cv::Mat laser_scan_view = buildLaserScanView(laser_points_base, cubes_base);
+            cv::imshow("LaserScan", laser_scan_view);
+            cv::waitKey(1);
         }
-
-        if (!img.empty()) {
-            int image_width = img.cols;
-            int image_height = img.rows;
-            drawCubes(img, cubes, camera_matrix_, dist_coeffs_);
-            cv::line(img, cv::Point(image_width / 2, 0), cv::Point(image_width / 2, image_height), cv::Scalar(255,255,255), 1);
-            cv::line(img, cv::Point(0, image_height / 2), cv::Point(image_width, image_height / 2), cv::Scalar(255,255,255), 1);
-            cv::circle(img, cv::Point(image_width / 2, image_height / 2), 15, cv::Scalar(100,255,100), 1);
-            cv::imshow("Camera", img);
-        }
-
-        cv::Mat laser_scan_view = buildLaserScanView(laser_points_base, cubes_base);
-        cv::imshow("LaserScan", laser_scan_view);
-        cv::waitKey(1);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
@@ -752,8 +793,10 @@ cv::Mat CarControlNode::buildLaserScanView(
 int main(int argc, char *argv[])
 {
   rclcpp::init(argc, argv);
+  rclcpp::executors::MultiThreadedExecutor executor;
   auto node = std::make_shared<CarControlNode>();
-  rclcpp::spin(node);
+  executor.add_node(node);
+  executor.spin();
   rclcpp::shutdown();
   return 0;
 }
