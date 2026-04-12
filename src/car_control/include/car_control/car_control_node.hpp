@@ -4,6 +4,8 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
+#include <image_transport/image_transport.hpp>
+#include <image_transport/publisher.hpp>
 #include "cv_bridge/cv_bridge.h"
 
 #include <opencv2/opencv.hpp>
@@ -44,7 +46,7 @@ class CarControlNode : public rclcpp::Node
 public:
         CarControlNode();
 
-        void imageCallback(const sensor_msgs::msg::Image::SharedPtr msg);
+        void imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr msg);
 
         std::unordered_map<int, std::vector<int>> groupById(
             const std::vector<int>& ids);
@@ -115,7 +117,9 @@ private:
         rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr scan_image_publisher_;
 
         rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_subscription_;
-        rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
+        // rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
+        std::shared_ptr<image_transport::Subscriber> img_sub_;
+
         rclcpp::TimerBase::SharedPtr image_timer_;
 
         //debug线程

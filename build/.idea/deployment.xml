@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="OrangePi5Ultra (0a6f8456-4b3c-45b8-a6c5-1f04e420c541)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$/.." web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

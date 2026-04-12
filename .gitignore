@@ -1,0 +1,6 @@
+# 默认忽略的文件
+./build
+./install
+./log
+./Camera
+./MvSdkLog

@@ -23,6 +23,8 @@ find_package(rclcpp REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(image_transport REQUIRED)
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -36,8 +38,8 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-add_executable(car_control src/car_control_node.cpp)
-ament_target_dependencies(car_control rclcpp sensor_msgs OpenCV cv_bridge)
+add_executable(car_control src/car_control_node.cpp src/tag_detector.cpp)
+ament_target_dependencies(car_control rclcpp sensor_msgs OpenCV cv_bridge image_transport)
 
 if(CAR_CONTROL_ENABLE_NATIVE_OPTIMIZATION AND NOT CMAKE_CROSSCOMPILING AND
    CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

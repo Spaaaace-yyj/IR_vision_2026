@@ -13,46 +13,7 @@
 // 自定义消息头文件
 #include "mvcc_camera_ros2_interface/msg/frame_info.hpp"
 
-#include <algorithm>
-#include <sstream>
-#include <vector>
-
 using namespace std;
-
-namespace {
-
-bool shouldSkipStartupParameter(const std::string &name)
-{
-    return name == "cam_sn" ||
-           name == "use_sim_time" ||
-           name.rfind("qos_overrides.", 0) == 0;
-}
-
-std::string summarizeParameterNames(
-    const std::vector<std::string> &names,
-    std::size_t max_names = 5)
-{
-    if (names.empty()) {
-        return "";
-    }
-
-    std::ostringstream summary;
-    const auto count = std::min(names.size(), max_names);
-    for (std::size_t i = 0; i < count; ++i) {
-        if (i != 0) {
-            summary << ", ";
-        }
-        summary << names[i];
-    }
-
-    if (names.size() > count) {
-        summary << " ...";
-    }
-
-    return summary.str();
-}
-
-}  // namespace
 
 // 前向声明
 class HikCamera;
@@ -100,61 +61,35 @@ public:
             camera_.close();
             throw std::runtime_error("Camera connection failed"); 
         }
-
         
 
-        // 遍历配置所有参数，并输出简洁的启动摘要
+
+        // 遍历配置所有参数
         std::vector<std::string> param_names = this->list_parameters({}, 10).names;
-        std::size_t applied_param_count = 0;
-        std::size_t skipped_param_count = 0;
-        std::vector<std::string> failed_param_names;
+        RCLCPP_INFO(this->get_logger(), "Total number of parameters: %zu", param_names.size());
         for (const auto& name : param_names)
         {
-            if (shouldSkipStartupParameter(name))
-            {
-                ++skipped_param_count;
-                continue;
-            }
-
             // 获取参数描述以确定参数类型
             try {
                 const rclcpp::Parameter& param = this->get_parameter(name);
-                const std::string param_value_str = param.value_to_string();
-                const int set_ret = camera_.setCameraParameterbyString(name, param_value_str);
-                if (set_ret == MV_OK) {
-                    ++applied_param_count;
-                } else {
-                    failed_param_names.push_back(name);
-                }
+
+                 std::string param_value_str = param.value_to_string();
+                                     
+                RCLCPP_INFO(this->get_logger(), "Parameter name: [%s] type: [%s] value: [%s]", 
+                           name.c_str(), 
+                           param.get_type_name().c_str(), 
+                           param_value_str.c_str());
+
+                camera_.setCameraParameterbyString(name, param_value_str);
             }
             catch (const std::exception& e)
             {
-                failed_param_names.push_back(name);
-                RCLCPP_WARN(this->get_logger(), "Failed to process parameter [%s]: %s", name.c_str(), e.what());
+                RCLCPP_WARN(this->get_logger(), "Failed to get parameter [%s]: [%s]", name.c_str(), e.what());
             }
-        }
-
-        RCLCPP_INFO(
-            this->get_logger(),
-            "Camera parameter sync finished: %zu applied, %zu skipped, %zu not applied",
-            applied_param_count,
-            skipped_param_count,
-            failed_param_names.size());
-        if (!failed_param_names.empty()) {
-            RCLCPP_WARN(
-                this->get_logger(),
-                "Camera parameters not applied: %s",
-                summarizeParameterNames(failed_param_names).c_str());
         }
         
         // 方式1: 注册经过处理后的图像  (接口上报的相机图像已经经过解码和格式转换)
-        nRet = camera_.registerProcessedImageCallback(ImagePublish::onNewProcessedFrameReport, this);
-        if (nRet != MV_OK)
-        {
-            RCLCPP_ERROR(this->get_logger(), "Failed to register camera callback, [%#x].", nRet);
-            camera_.close();
-            throw std::runtime_error("Camera callback registration failed");
-        }
+        camera_.registerProcessedImageCallback(ImagePublish::onNewProcessedFrameReport, this);
 
         // 方式2： 注册相机输出的图像，（图像没有经过处理， 应用层根据需要进行处理后发布)
        // camera_.registerImageCallback(ImagePublish::onNewFrameReport, this);
@@ -244,7 +179,7 @@ private:
             RCLCPP_ERROR(this->get_logger(), "[onNewFrameProc] imageDecodingProcess failed, [%#x].", nRet);
             return;
         }
-        RCLCPP_DEBUG(this->get_logger(), "[onNewFrameProc] imageDecodingProcess success.");
+        RCLCPP_INFO(this->get_logger(), "[onNewFrameProc] imageDecodingProcess success .");
 
 
 #if 0
@@ -293,7 +228,7 @@ private:
             RCLCPP_ERROR(this->get_logger(), "[onNewFrameProc] imageConvertProcess failed, [%#x].", nRet);
             return;
         }
-        RCLCPP_DEBUG(this->get_logger(), "[onNewFrameProc] imageConvertProcess success.");
+        RCLCPP_INFO(this->get_logger(), "[onNewFrameProc] imageConvertProcess success .");
 
 
         // 发送图像数据到ROS2
@@ -333,10 +268,7 @@ private:
         else
         {
             // 不支持的像素格式
-            RCLCPP_ERROR(
-                this->get_logger(),
-                "Not support pixeltype  [%#x] .",
-                static_cast<unsigned int>(convert_info.enDestPixelType));
+            RCLCPP_ERROR(this->get_logger(), "Not support pixeltype  [%x] .", convert_info.enDestPixelType);
             return;
         }
         
@@ -350,6 +282,9 @@ private:
         // === 发布标准 消息 ===
         image_pub_->publish(*image_ptr);
         info_pub_->publish(*info_ptr);
+
+
+        RCLCPP_INFO(this->get_logger(), "[onNewFrameProc] success publish image & info .");
 
         // 创建并发布FrameInfo消息
         if(frame_info_pub_ && frame_info_pub_->get_subscription_count() > 0)
@@ -412,13 +347,11 @@ private:
             
             // 发布FrameInfo消息
             frame_info_pub_->publish(*frame_info_msg);
+
+            RCLCPP_INFO(this->get_logger(), "[onNewFrameProc] success publish frameinfo .");
         }
         
-        logPublishSummary(
-            frame_info->nFrameNum,
-            convert_info.nWidth,
-            convert_info.nHeight,
-            static_cast<uint32_t>(convert_info.enDestPixelType));
+        RCLCPP_INFO(this->get_logger(), "[onNewFrameProc] Publisher Send seq [%u]  image success", seq_);
         seq_++;
     }
 
@@ -476,6 +409,8 @@ private:
         // === 发布标准 消息 ===
         image_pub_->publish(*image_ptr);
         info_pub_->publish(*info_ptr);
+
+        RCLCPP_INFO(this->get_logger(), "[onNewProcessedFrameReport] success publish image and info .");
 
         // 创建并发布FrameInfo消息
         if(frame_info_pub_ && frame_info_pub_->get_subscription_count() > 0)
@@ -536,35 +471,15 @@ private:
             
             // 发布FrameInfo消息
             frame_info_pub_->publish(*frame_info_msg);
+
+            RCLCPP_INFO(this->get_logger(), "[onNewProcessedFrameReport] success publish frameinfo .");
         }
         
-        logPublishSummary(
-            frame_info->nFrameNum,
-            frame_info->nExtendWidth,
-            frame_info->nExtendHeight,
-            static_cast<uint32_t>(frame_info->enPixelType));
+        RCLCPP_INFO(this->get_logger(), "[Publisher] Send seq [%u]  image success", seq_);
         seq_++;
     }
 
 private:
-    void logPublishSummary(
-        uint32_t frame_num,
-        uint32_t width,
-        uint32_t height,
-        uint32_t pixel_type)
-    {
-        RCLCPP_INFO_THROTTLE(
-            this->get_logger(),
-            *this->get_clock(),
-            5000,
-            "[Publisher] streaming: published=%u frame=%u size=%ux%u pixel=0x%x",
-            seq_ + 1,
-            frame_num,
-            width,
-            height,
-            pixel_type);
-    }
-
     HikCamera camera_;
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_pub_;

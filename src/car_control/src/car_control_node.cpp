@@ -18,9 +18,13 @@ CarControlNode::CarControlNode() : Node("car_control_node")
     rclcpp::SensorDataQoS qos;
     qos.keep_last(10);
 
-    image_sub_ = this->create_subscription<sensor_msgs::msg::Image>(
-            "/mvcc_camera/Image", 3,
-            std::bind(&CarControlNode::imageCallback, this, std::placeholders::_1));
+    // image_sub_ = this->create_subscription<sensor_msgs::msg::Image>(
+    //         "/mvcc_camera/Image", qos,
+    //         std::bind(&CarControlNode::imageCallback, this, std::placeholders::_1));
+    std::string transport_ = this->declare_parameter("subscribe_compressed", false) ? "compressed" : "raw";
+    img_sub_ = std::make_shared<image_transport::Subscriber>(image_transport::create_subscription(
+    this, "/image_raw", std::bind(&CarControlNode::imageCallback, this, std::placeholders::_1),
+    transport_, rmw_qos_profile_sensor_data));
 
     // image_timer_ = this->create_wall_timer(33ms, std::bind(&CarControlNode::imageCallback, this));
     image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/car_control/image_debug", rclcpp::SensorDataQoS());
@@ -87,7 +91,7 @@ CarControlNode::CarControlNode() : Node("car_control_node")
     RCLCPP_INFO(this->get_logger(), "Success Init Car Control node!");
 }
 
-void CarControlNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
+void CarControlNode::imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr msg)
 {
 
     static int fps = 0;
@@ -112,7 +116,6 @@ void CarControlNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
         RCLCPP_ERROR(this->get_logger(),
                      "cv_bridge exception: %s", e.what());
     }
-
 
     // cap_.grab();
     // cap_.retrieve(frame);
@@ -274,7 +277,7 @@ void CarControlNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
         }
     }
 
-    double latency = (this->now() - t0).seconds() * 1000.0;
+    double latency = (this->now() - msg->header.stamp).seconds() * 1000.0;
 
     std::stringstream ss;
     ss << "Latency: " << std::fixed << std::setprecision(2) << latency << " ms";
@@ -324,12 +327,24 @@ void CarControlNode::debugThread()
                 cv::line(img, cv::Point(image_width / 2, 0), cv::Point(image_width / 2, image_height), cv::Scalar(255,255,255), 1);
                 cv::line(img, cv::Point(0, image_height / 2), cv::Point(image_width, image_height / 2), cv::Scalar(255,255,255), 1);
                 cv::circle(img, cv::Point(image_width / 2, image_height / 2), 15, cv::Scalar(100,255,100), 1);
-                cv::imshow("Camera", img);
+                // cv::imshow("Camera", img);
             }
         
             cv::Mat laser_scan_view = buildLaserScanView(laser_points_base, cubes_base);
-            cv::imshow("LaserScan", laser_scan_view);
-            cv::waitKey(1);
+            // cv::imshow("LaserScan", laser_scan_view);
+            // cv::waitKey(1);
+
+            std_msgs::msg::Header header;
+            header.stamp = this->now();
+
+
+            cv_bridge::CvImage debug_img(header, "bgr8", img);
+            auto image_msg = debug_img.toImageMsg();
+            image_publisher_->publish(*image_msg);
+            
+            cv_bridge::CvImage scan_img(header, "bgr8", laser_scan_view);
+            auto scan_msg = scan_img.toImageMsg();
+            scan_image_publisher_->publish(*scan_msg);
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -552,6 +567,11 @@ std::vector<cv::Point3f> CarControlNode::transformLaserPointsToBase(
     return transformed_points;
 }
 
+void drawX(cv::Point2f p, cv::Mat& frame){
+    cv::line(frame, p + cv::Point2f(-30, -30), p + cv::Point2f(30, 30), cv::Scalar(0,0,255), 1);
+    cv::line(frame, p + cv::Point2f(-30, 30), p + cv::Point2f(30, -30), cv::Scalar(0,0,255), 1);
+}
+
 void CarControlNode::drawCubes(
     cv::Mat& frame,
     const std::vector<CubeState>& cubes,
@@ -565,6 +585,7 @@ void CarControlNode::drawCubes(
             1.0,
             cv::Scalar(0,0,255),
             2);
+        drawX(cv::Point2f(frame.cols / 2, frame.rows / 2), frame);
         return;
     }else{
         std::stringstream ss;
@@ -601,6 +622,10 @@ void CarControlNode::drawCubes(
                 0.6,
                 cv::Scalar(0,0,255),
                 1);
+        }
+        if(cube.id == 0){
+            drawX(center2d[0], frame);
+
         }
 
         float l = cube_size / 2.0;
@@ -675,7 +700,6 @@ void CarControlNode::drawCubes(
         }
     }
 }
-
 
 //debug
 cv::Mat CarControlNode::buildLaserScanView(

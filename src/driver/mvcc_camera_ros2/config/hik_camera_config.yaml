@@ -70,18 +70,18 @@
     #   - BayerBG8
     #   - RGB8
     # 注意: 实际支持项以相机型号为准。
-    PixelFormat: BayerRG8
+    PixelFormat: BayerGB8
 
     # 曝光时间，单位微秒(us)。
     # 类型: float
     # 注意: 若 ExposureAuto 打开，该值通常会被自动曝光接管。
-    ExposureTime: 7000.0
+    ExposureTime: 8000.0
 
     # 模拟/数字增益。
     # 类型: float
     # 单位: dB（常见）
     # 注意: 若 GainAuto 打开，该值通常会被自动增益接管。
-    Gain: 20.0
+    Gain: 2.0
 
     # ============================================================
     # 3. 采集与帧率
@@ -99,13 +99,13 @@
     # 类型: bool
     # true: 使用 AcquisitionFrameRate 限制输出帧率
     # false: 由曝光、带宽、触发等条件自然决定帧率
-    AcquisitionFrameRateEnable: true
+    # AcquisitionFrameRateEnable: false
 
     # 目标采集帧率。
     # 类型: float
     # 单位: fps
     # 注意: 只有在 AcquisitionFrameRateEnable=true 时通常才生效。
-    AcquisitionFrameRate: 24.0
+    # AcquisitionFrameRate: 30.0
 
     # 线阵相机行频。
     # 类型: integer
