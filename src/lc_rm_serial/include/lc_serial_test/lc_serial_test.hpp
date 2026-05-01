@@ -15,6 +15,7 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include <sensor_msgs/msg/joint_state.hpp>
 #include "auto_aim_interfaces/msg/cmd.hpp"
+#include "auto_aim_interfaces/msg/mcu_feed_back.hpp"
 // serial_driver
 #include <serial_driver/serial_driver.hpp>
 
@@ -27,22 +28,17 @@
 //按照通信格式修改接收或发送结构体，保证和下位机通信一致，只有浮点位
 typedef struct
 {
-	bool fire = false;
-	bool tracing = false;
-
-	float pitch;
-	float yaw;
-	float is_fire;
-	float v_x;
-	float v_y;
-	float w;
+	float target_yaw;
+	float tracing;	//0 or 1
 } Vision_Send_s;
 
 typedef struct
 {
 	float yaw;
-	float pitch;
-    float row;
+	float laser_ranging_L0;
+	float laser_ranging_L1;
+	float laser_ranging_R0;
+	float laser_ranging_R1;
 } Vision_Recv_s;
 
 class LcSerialTestNode : public rclcpp::Node
@@ -60,9 +56,8 @@ private:
 
 	void OpenPort();
 private:
-	void NavigationCallback(const geometry_msgs::msg::Twist::SharedPtr msg);
 
-	void GimbalControlCallback(const auto_aim_interfaces::msg::Cmd::SharedPtr msg);
+	void CarControlCallback(const auto_aim_interfaces::msg::Cmd::SharedPtr msg);
 
 	inline void setBit(uint16_t &data, uint8_t n, bool state);
 
@@ -73,17 +68,15 @@ private:
 
     Vision_Recv_s recv_data;
 	Vision_Send_s send_data = {
-		.pitch = 0.0,
-		.yaw = 0.0,
-		.v_x = 0.0,
-		.v_y = 0.0,
-		.w = 0.0,
+		.target_yaw = 0.0f,
+		.tracing = 0.0f,
 	};
 
 private:
 	//subscription
-	rclcpp::Subscription<auto_aim_interfaces::msg::Cmd>::SharedPtr gimbal_control_sub_;
-
+	rclcpp::Subscription<auto_aim_interfaces::msg::Cmd>::SharedPtr control_sub_;
+	//publisher
+	rclcpp::Publisher<auto_aim_interfaces::msg::McuFeedBack>::SharedPtr mcu_msg_pub_;
 private:
   	rclcpp::TimerBase::SharedPtr serial_timer_;
 

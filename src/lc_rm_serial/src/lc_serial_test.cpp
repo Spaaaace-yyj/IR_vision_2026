@@ -8,9 +8,12 @@ LcSerialTestNode::LcSerialTestNode(const rclcpp::NodeOptions & options)
 
     RCLCPP_INFO(this->get_logger(), "Starting serial node...");
     //subscription
-    gimbal_control_sub_ = this->create_subscription<auto_aim_interfaces::msg::Cmd>(
-        "control/car_cmd_vel", 1, std::bind(&LcSerialTestNode::GimbalControlCallback, this, std::placeholders::_1));
-    
+    control_sub_ = this->create_subscription<auto_aim_interfaces::msg::Cmd>(
+        "control/car_cmd_vel", 1, std::bind(&LcSerialTestNode::CarControlCallback, this, std::placeholders::_1));
+
+    mcu_msg_pub_ = this->create_publisher<auto_aim_interfaces::msg::McuFeedBack>("feedback/mcu_msg", 10);
+    //publisher
+
     serial_timer_ = this->create_wall_timer(std::chrono::milliseconds(10),
         std::bind(&LcSerialTestNode::SendData, this));
 
@@ -39,13 +42,10 @@ LcSerialTestNode::LcSerialTestNode(const rclcpp::NodeOptions & options)
 
 }
 
-void LcSerialTestNode::NavigationCallback(const geometry_msgs::msg::Twist::SharedPtr msg){
-
-}
-
-void LcSerialTestNode::GimbalControlCallback(const auto_aim_interfaces::msg::Cmd::SharedPtr msg)
+void LcSerialTestNode::CarControlCallback(const auto_aim_interfaces::msg::Cmd::SharedPtr msg)
 {
-    
+    send_data.target_yaw = msg->target_yaw;
+    send_data.tracing = msg->tracing;
 }
 
 void LcSerialTestNode::OpenPort(){
@@ -85,11 +85,8 @@ void LcSerialTestNode::SendData(){
     uint16_t flags_register = 0x0000;
     uint16_t tx_len;
     uint8_t send_temp[64]= {0};
-    //标志位处理
-    setBit(flags_register, CAN_FIRE_BIT, send_data.fire);
-    setBit(flags_register, TRACING_STATE_BIT, send_data.tracing);
 
-    get_protocol_send_data(0x01, flags_register, &send_data.pitch, 5, send_temp, &tx_len);
+    get_protocol_send_data(0x01, flags_register, &send_data.target_yaw, 2, send_temp, &tx_len);
     std::vector<uint8_t> send_buffer(send_temp, send_temp + tx_len);
     //debug
     // for (size_t i = 0; i < send_buffer.size(); ++i)
@@ -128,15 +125,6 @@ void LcSerialTestNode::receiveLoop()
             };
 
             if(buffer[0] == 0xA5){
-                // std::cout << "receive [" << n << " byte] data : ";
-                // for (size_t i = 0; i < n; i++){
-                //     std::cout << std::hex
-                //     << std::setw(2)
-                //     << std::setfill('0')
-                //     << static_cast<int>(buffer[i])
-                //     << " ";
-                // }
-                // std::cout << std::dec << std::endl;
                 DecodeData();
             }else{
                 RCLCPP_WARN(this->get_logger(), "Can't find CMD_ID! skip this loop!");

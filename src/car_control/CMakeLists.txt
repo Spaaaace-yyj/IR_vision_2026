@@ -23,6 +23,7 @@ find_package(OpenCV REQUIRED CONFIG)
 find_package(cv_bridge REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(image_transport REQUIRED)
+find_package(auto_aim_interfaces REQUIRED)
 
 include_directories(
         /usr/local/include/apriltag
@@ -45,7 +46,7 @@ if(BUILD_TESTING)
 endif()
 
 add_executable(car_control src/car_control_node.cpp src/tag_detector.cpp)
-ament_target_dependencies(car_control rclcpp sensor_msgs OpenCV cv_bridge image_transport)
+ament_target_dependencies(car_control rclcpp sensor_msgs OpenCV cv_bridge image_transport auto_aim_interfaces)
 
 target_link_libraries(car_control
         ${OpenCV_LIBS}

@@ -15,7 +15,12 @@ CarControlNode::CarControlNode() : Node("car_control_node")
     image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/car_control/image_debug", rclcpp::SensorDataQoS());
     
     scan_image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/car_control/scan_debug", rclcpp::SensorDataQoS());
-    
+    control_cmd_publisher_ = this->create_publisher<auto_aim_interfaces::msg::Cmd>("control/car_cmd_vel", 1);
+
+    mcu_feedback_sub_ = this->create_subscription<auto_aim_interfaces::msg::McuFeedBack>(
+        "feedback/mcu_msg",
+        10,
+        std::bind(&CarControlNode::mcuCallback, this, std::placeholders::_1));
     scan_subscription_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
         "/scan",
         rclcpp::SensorDataQoS(),
@@ -79,12 +84,8 @@ CarControlNode::CarControlNode() : Node("car_control_node")
 CarControlNode::~CarControlNode()
 {
     debug_running_.store(false);
-    detector_running_.store(false);
     if (show_thread_.joinable()) {
         show_thread_.join();
-    }
-    if (detect_thread_.joinable()) {
-        detect_thread_.join();
     }
 }
 
@@ -142,6 +143,23 @@ void CarControlNode::imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr
 
     //apriltag识别和cube位姿解算
     const CubeDetectionResult detection = cube_detector_->detectCubes(frame);
+    cube_state_ = detection;
+    CubeState target_cube;
+    for (size_t i = 0; i < cube_state_.cubes_base.size(); i++) {
+        if (cube_state_.cubes_base[i].id == 0) {
+            target_cube = cube_state_.cubes_base[i];
+            break;
+        }
+        if (cube_state_.cubes_base[i].id == 1 && is_blue) {
+            target_cube = cube_state_.cubes_base[i];
+        }
+        if (cube_state_.cubes_base[i].id == 2 && !is_blue) {
+            target_cube = cube_state_.cubes_base[i];
+        }
+    }
+
+    float target_yaw = projectAndComputeAngle(target_cube.center);
+    RCLCPP_INFO(this->get_logger(), "target_yaw = %f", target_yaw);
 
     auto t1 = std::chrono::steady_clock::now();
 
@@ -192,13 +210,17 @@ void CarControlNode::imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr
     }
 }
 
+void CarControlNode::mcuCallback(const auto_aim_interfaces::msg::McuFeedBack::SharedPtr msg) {
+
+}
+
 /**
  *
  * @brief debug线程，绘制debug数据
  */
 void CarControlNode::debugThread()
 {
-    bindThreadToCores({6,7});
+    bindThreadToCores({7});
     cv::Mat img;
     std::vector<CubeState> cubes;
     std::vector<CubeState> cubes_base;
@@ -270,6 +292,28 @@ void CarControlNode::debugThread()
 }
 
 /**
+ *
+ * @brief 雷达消息回调函数
+ * @param msg
+ */
+void CarControlNode::scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
+{
+    const std::vector<cv::Point2f> laser_points = laserScanToCartesian(*msg);
+    //转换到底盘坐标系
+    const std::vector<cv::Point3f> laser_points_base =
+        transformLaserPointsToBase(laser_points);
+
+    {
+        std::lock_guard<std::mutex> lock(debug_mutex_);
+        laser_points_base_ = laser_points_base;
+    }
+}
+
+float CarControlNode::projectAndComputeAngle(const cv::Point3f &p) {
+    return std::atan2(p.y, p.x);
+}
+
+/**
  * @brief 极坐标转笛卡尔坐标系
  * @param range 长度
  * @param angle_rad 角度
@@ -294,29 +338,11 @@ std::vector<cv::Point2f> CarControlNode::laserScanToCartesian(
             range >= scan.range_min &&
             range <= scan.range_max) {
             points.emplace_back(polarToCartesian(range, angle));
-        }
+            }
         angle += scan.angle_increment;
     }
 
     return points;
-}
-
-/**
- *
- * @brief 雷达消息回调函数
- * @param msg
- */
-void CarControlNode::scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
-{
-    const std::vector<cv::Point2f> laser_points = laserScanToCartesian(*msg);
-    //转换到底盘坐标系
-    const std::vector<cv::Point3f> laser_points_base =
-        transformLaserPointsToBase(laser_points);
-
-    {
-        std::lock_guard<std::mutex> lock(debug_mutex_);
-        laser_points_base_ = laser_points_base;
-    }
 }
 
 /**
@@ -435,6 +461,9 @@ void CarControlNode::drawCubes(
             cv::Scalar(0,255,0),
             2);
     }
+
+    std::vector<cv::Point2f> target_center2d;
+
     for (const auto& cube : cubes)
     {
         if (!cube.valid) continue;
@@ -460,6 +489,17 @@ void CarControlNode::drawCubes(
                 cv::Scalar(0,0,255),
                 1);
         }
+
+        if (cube.id == 1 && is_blue) {
+            target_center2d = center2d;
+        }
+        if (cube.id == 2 && !is_blue) {
+            target_center2d = center2d;
+        }
+        if (cube.id == 0) {
+            target_center2d = center2d;
+        }
+
         if(cube.id == 0 && !center2d.empty()){
             drawX(center2d[0], frame);
         }
@@ -535,6 +575,9 @@ void CarControlNode::drawCubes(
         //         tag.tvec,
         //         0.04);
         // }
+    }
+    if (!target_center2d.empty()) {
+        drawX(target_center2d[0], frame);
     }
 }
 

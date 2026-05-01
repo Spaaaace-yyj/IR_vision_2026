@@ -22,53 +22,20 @@
     <cargoProject FILE="$PROJECT_DIR$/auto_aim_interfaces/rosidl_generator_rs/auto_aim_interfaces/rust/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7626516f-c895-4c62-a079-a52b1f190afc" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../src/car_control/include/car_control/tag_detector.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../src/car_control/src/tag_detector.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/IR_vision_2026.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MvSdkLog/CamCtrl_00.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MvSdkLog/MvUsb3vTL_00.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/car_bringup/launch/car_bringup.launch.py" beforeDir="false" afterPath="$PROJECT_DIR$/../src/car_bringup/launch/car_bringup.launch.py" afterDir="false" />
+    <list default="true" id="7626516f-c895-4c62-a079-a52b1f190afc" name="更改" comment="改用apriltag3官方识别库，删除原有双层识别逻辑，并且对debug线程做了无锁拷贝和限制刷新频率，不开debug的时候处理速度有很大提升。补充了部分注释">
+      <change afterPath="$PROJECT_DIR$/../src/auto_aim_interfaces/msg/McuFeedBack.msg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/auto_aim_interfaces/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/auto_aim_interfaces/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/auto_aim_interfaces/msg/Cmd.msg" beforeDir="false" afterPath="$PROJECT_DIR$/../src/auto_aim_interfaces/msg/Cmd.msg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/auto_aim_interfaces/package.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../src/auto_aim_interfaces/package.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../src/car_control/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/car_control/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../src/car_control/include/car_control/car_control_node.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../src/car_control/include/car_control/car_control_node.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/car_control/package.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../src/car_control/package.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../src/car_control/src/car_control_node.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../src/car_control/src/car_control_node.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/dji_Action4_camera/src/camera_node.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../src/driver/dji_Action4_camera/src/camera_node.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mindvision_camera/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../src/driver/mindvision_camera/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mindvision_camera/config/camera_params.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../src/driver/mindvision_camera/config/camera_params.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2/CMakeLists.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2/common/camera_parameter_service_manager.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2/common/hik_camera.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2/config/hik_camera_config.yaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2/launch/connect_by_config.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2/package.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2/src/camera_parameter_service_manager.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2/src/camera_params_test.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2/src/create_camera_image_pub.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2/src/create_camera_image_sub.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2/src/hik_camera.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2_interface/CMakeLists.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2_interface/msg/ChunkDataContent.msg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2_interface/msg/FrameInfo.msg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2_interface/package.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2_interface/srv/ExecuteCommand.srv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2_interface/srv/GetBoolValue.srv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2_interface/srv/GetEnumValue.srv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2_interface/srv/GetFloatValue.srv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2_interface/srv/GetIntegerValue.srv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2_interface/srv/GetStringValue.srv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2_interface/srv/SetBoolValue.srv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2_interface/srv/SetEnumValue.srv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2_interface/srv/SetFloatValue.srv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2_interface/srv/SetIntegerValue.srv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/mvcc_camera_ros2_interface/srv/SetStringValue.srv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/driver/rplidar_ros" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/vision_opencv" beforeDir="false" afterPath="$PROJECT_DIR$/../src/vision_opencv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/driver/rplidar_ros" beforeDir="false" afterPath="$PROJECT_DIR$/../src/driver/rplidar_ros" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/lc_rm_serial/include/lc_serial_test/lc_serial_test.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../src/lc_rm_serial/include/lc_serial_test/lc_serial_test.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/lc_rm_serial/src/lc_serial_test.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../src/lc_rm_serial/src/lc_serial_test.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -176,8 +143,17 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1777551813305</updated>
-      <workItem from="1777551814311" duration="14248000" />
+      <workItem from="1777551814311" duration="20359000" />
     </task>
+    <task id="LOCAL-00001" summary="改用apriltag3官方识别库，删除原有双层识别逻辑，并且对debug线程做了无锁拷贝和限制刷新频率，不开debug的时候处理速度有很大提升。补充了部分注释">
+      <option name="closed" value="true" />
+      <created>1777613863694</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1777613863694</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -193,6 +169,10 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="改用apriltag3官方识别库，删除原有双层识别逻辑，并且对debug线程做了无锁拷贝和限制刷新频率，不开debug的时候处理速度有很大提升。补充了部分注释" />
+    <option name="LAST_COMMIT_MESSAGE" value="改用apriltag3官方识别库，删除原有双层识别逻辑，并且对debug线程做了无锁拷贝和限制刷新频率，不开debug的时候处理速度有很大提升。补充了部分注释" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
