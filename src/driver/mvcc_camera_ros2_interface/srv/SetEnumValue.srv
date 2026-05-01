@@ -1,7 +1,0 @@
-# 命令请求
-string str_key
-string strvalue  # value to be setted
----
-# 命令响应
-bool success     # indicate successful run of triggered service
-string message   # informational, e.g., for error messages

@@ -6,58 +6,40 @@
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include <image_transport/image_transport.hpp>
 #include <image_transport/publisher.hpp>
-#include "cv_bridge/cv_bridge.h"
+#include "cv_bridge/cv_bridge.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
 #include <opencv2/calib3d.hpp>
 
 #include <chrono>
+#include <memory>
 #include <mutex>
 #include <thread>
-#include <unordered_map>
-#include <vector>
 #include <atomic>
+#include <vector>
 
-struct TagPose {
-    int id;
-    cv::Mat rvec;
-    cv::Mat tvec;
-    cv::Point3f center;
-};
-
-struct CubeState {
-    int id;
-    std::vector<TagPose> tags;
-
-    cv::Point3f center;
-    cv::Mat R;
-
-    cv::Mat rvec;
-    cv::Mat tvec;
-
-    bool valid = false;
-};
+#include "tag_detector.hpp"
 
 using namespace std::chrono_literals;
+
+//多线程通讯
+struct DebugPacket {
+    rclcpp::Time stamp;
+
+    cv::Mat frame;
+    std::vector<cv::Point3f> laser_points;
+    CubeDetectionResult result;
+    double detector_latency;
+};
 
 class CarControlNode : public rclcpp::Node
 {
 public:
         CarControlNode();
+        ~CarControlNode() override;
 
         void imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr msg);
-
-        std::unordered_map<int, std::vector<int>> groupById(
-            const std::vector<int>& ids);
-
-        CubeState estimateCube(
-            int id,
-            const std::vector<int>& indices,
-            const std::vector<std::vector<cv::Point2f>>& corners,
-            const std::vector<cv::Point3f>& tag_def_point,
-            const cv::Mat& camera_matrix,
-            const cv::Mat& dist_coeffs);
 
         void drawCubes(
             cv::Mat& frame,
@@ -78,64 +60,71 @@ public:
         void scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
 
         void debugThread();
+
 private:
-        static cv::Matx33d rpyToRotationMatrix(const cv::Vec3d& rpy);
+    void bindThreadToCores(const std::vector<int>& cores);
 
-        static cv::Point3f transformPoint(
-            const cv::Point3f& point,
-            const cv::Matx33d& rotation,
-            const cv::Vec3d& translation);
+    static cv::Matx33d rpyToRotationMatrix(const cv::Vec3d& rpy);
 
-        CubeState transformCubeToBase(const CubeState& cube) const;
+    static cv::Point3f transformPoint(
+    const cv::Point3f& point,
+    const cv::Matx33d& rotation,
+    const cv::Vec3d& translation);
 
-        std::vector<cv::Point3f> transformLaserPointsToBase(
-            const std::vector<cv::Point2f>& laser_points) const;
+    std::vector<cv::Point3f> transformLaserPointsToBase(
+    const std::vector<cv::Point2f>& laser_points) const;
 
-        cv::Mat camera_matrix_;   
-        cv::Mat dist_coeffs_;    
+    CubeDetectParams cube_detector_params;
+    std::unique_ptr<Detector> cube_detector_;
 
-        cv::Matx33d camera_to_base_rotation_ = cv::Matx33d::eye();
-        cv::Vec3d camera_to_base_translation_ = cv::Vec3d(0.0, 0.0, 0.0);
-        cv::Matx33d lidar_to_base_rotation_ = cv::Matx33d::eye();
-        cv::Vec3d lidar_to_base_translation_ = cv::Vec3d(0.0, 0.0, 0.0);
+    cv::Mat camera_matrix_;
+    cv::Mat dist_coeffs_;
 
-        cv::Ptr<cv::aruco::Dictionary> detector_dict_;
-        cv::Ptr<cv::aruco::DetectorParameters> detector_params_;
-        cv::Ptr<cv::aruco::DetectorParameters> fast_detector_params_;
+    cv::Matx33d camera_to_base_rotation_ = cv::Matx33d::eye();
+    cv::Vec3d camera_to_base_translation_ = cv::Vec3d(0.0, 0.0, 0.0);
+    cv::Matx33d lidar_to_base_rotation_ = cv::Matx33d::eye();
+    cv::Vec3d lidar_to_base_translation_ = cv::Vec3d(0.0, 0.0, 0.0);
 
-        float tag_size = 0.08; //m
-        float cube_size = 0.15; //m
-        float roi_search_scale_ = 0.75F;
-        float roi_padding_ratio_ = 0.08F;
-        int roi_min_area_ = 500;
-        int roi_child_min_area_ = 600;
-        
-        std::vector<cv::Point3f> tag_def_point;
+    float tag_size = 0.08; //m
+    float cube_size = 0.15; //m
+
 private:
-        cv::VideoCapture cap_;
-        rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_publisher_;
-        rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr scan_image_publisher_;
+    cv::VideoCapture cap_;
+    rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_publisher_;
+    rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr scan_image_publisher_;
 
-        rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_subscription_;
-        // rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
-        std::shared_ptr<image_transport::Subscriber> img_sub_;
+    rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_subscription_;
+    // rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
+    std::shared_ptr<image_transport::Subscriber> img_sub_;
 
-        rclcpp::TimerBase::SharedPtr image_timer_;
+    rclcpp::TimerBase::SharedPtr image_timer_;
 
-        //debug线程
-        std::mutex img_mutex_;
-        cv::Mat latest_frame_;
-        std::atomic<bool> new_frame_{false};
+    //debug线程
+    std::thread show_thread_;
+    std::mutex debug_mutex_;
+    std::atomic<bool> debug_running_{true};
 
-        std::vector<CubeState> cubes_;
-        std::vector<CubeState> cubes_base_;
-        std::vector<cv::Point3f> laser_points_base_;
+    DebugPacket debug_buffer[2];
+    std::atomic<int> debug_write_index_{0};
+    std::atomic<int> debug_read_index_{1};
+    std::atomic<uint64_t> debug_frame_id_{0};
+    std::atomic<uint64_t> last_debug_processed_id_{0};
+    std::atomic<bool> new_frame_{false};
 
-        std::thread show_thread_;
+    std::vector<CubeState> cubes_;
+    std::vector<CubeState> cubes_base_;
+    std::vector<cv::Point3f> laser_points_base_;
 
-        std::thread control_thread_;
 
-        bool debug_mode_ = true;
+    //检测线程
+    std::thread detect_thread_;
+    std::atomic<uint64_t> frame_id_{0};
+    std::atomic<uint64_t> last_processed_id_{0};
+    std::atomic<bool> detector_running_{true};
+    std::atomic<int> write_index_{0};
+    std::atomic<int> read_index_{1};
+
+    bool debug_mode_ = true;
 
 };
 

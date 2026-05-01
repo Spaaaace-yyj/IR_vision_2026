@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="BackendCodeEditorMiscSettings">
+    <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
+  </component>
+  <component name="CMakeProjectFlavorService">
+    <option name="flavorId" value="CMakePlainProjectFlavor" />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="0e18ffc9-2861-4655-9e74-909a16ae9215" name="更改" comment="">
+      <change afterPath="$PROJECT_DIR$/src/car_control/include/car_control/tag_detector.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/car_control/src/tag_detector.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/IR_vision_2026.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MvSdkLog/CamCtrl_00.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/MvSdkLog/MvUsb3vTL_00.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/.idea/deployment.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/.idea/editor.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/car_bringup/launch/car_bringup.launch.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/car_bringup/launch/car_bringup.launch.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/car_control/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/car_control/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/car_control/include/car_control/car_control_node.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/car_control/include/car_control/car_control_node.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/car_control/src/car_control_node.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/car_control/src/car_control_node.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/dji_Action4_camera/src/camera_node.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/driver/dji_Action4_camera/src/camera_node.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mindvision_camera/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/src/driver/mindvision_camera/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mindvision_camera/config/camera_params.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/driver/mindvision_camera/config/camera_params.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2/CMakeLists.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2/common/camera_parameter_service_manager.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2/common/hik_camera.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2/config/hik_camera_config.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2/launch/connect_by_config.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2/package.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2/src/camera_parameter_service_manager.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2/src/camera_params_test.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2/src/create_camera_image_pub.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2/src/create_camera_image_sub.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2/src/hik_camera.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2_interface/CMakeLists.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2_interface/msg/ChunkDataContent.msg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2_interface/msg/FrameInfo.msg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2_interface/package.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2_interface/srv/ExecuteCommand.srv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2_interface/srv/GetBoolValue.srv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2_interface/srv/GetEnumValue.srv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2_interface/srv/GetFloatValue.srv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2_interface/srv/GetIntegerValue.srv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2_interface/srv/GetStringValue.srv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2_interface/srv/SetBoolValue.srv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2_interface/srv/SetEnumValue.srv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2_interface/srv/SetFloatValue.srv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2_interface/srv/SetIntegerValue.srv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/mvcc_camera_ros2_interface/srv/SetStringValue.srv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/rplidar_ros" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/rplidar_ros/scripts/create_udev_rules.sh" beforeDir="false" afterPath="$PROJECT_DIR$/src/driver/rplidar_ros/scripts/create_udev_rules.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/driver/rplidar_ros/scripts/delete_udev_rules.sh" beforeDir="false" afterPath="$PROJECT_DIR$/src/driver/rplidar_ros/scripts/delete_udev_rules.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/vision_opencv" beforeDir="false" afterPath="$PROJECT_DIR$/src/vision_opencv" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Spaaaace-yyj&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Spaaaace-yyj/IR_vision_2026.git&quot;,
+    &quot;accountId&quot;: &quot;92308567-e15e-4fcf-8bc2-d673fdbf0ba9&quot;
+  }
+}</component>
+  <component name="MacroExpansionManager">
+    <option name="directoryName" value="J949jCHn" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3CFWhYPpOCVFDTr6rPZe3Kc0cUz" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.RadMigrateCodeStyle&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/nuc/Code/IR_vision_2026/build/compile_commands.json&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="0e18ffc9-2861-4655-9e74-909a16ae9215" name="更改" comment="" />
+      <created>1775981918906</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1775981918906</updated>
+      <workItem from="1775981920144" duration="81000" />
+      <workItem from="1776052041021" duration="1427000" />
+      <workItem from="1777551539307" duration="279000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>

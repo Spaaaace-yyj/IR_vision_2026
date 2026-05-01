@@ -7,26 +7,11 @@
 
 CarControlNode::CarControlNode() : Node("car_control_node")
 {
-    //打开摄像头
-    // cap_.open(1, cv::CAP_V4L2);
-    // cap_.open(1);
-    // if(!cap_.isOpened()){
-    //     RCLCPP_ERROR(this->get_logger(), "Cannot open camera");
-    //     return; 
-    // }
-
-    rclcpp::SensorDataQoS qos;
-    qos.keep_last(10);
-
-    // image_sub_ = this->create_subscription<sensor_msgs::msg::Image>(
-    //         "/mvcc_camera/Image", qos,
-    //         std::bind(&CarControlNode::imageCallback, this, std::placeholders::_1));
     std::string transport_ = this->declare_parameter("subscribe_compressed", false) ? "compressed" : "raw";
     img_sub_ = std::make_shared<image_transport::Subscriber>(image_transport::create_subscription(
     this, "/image_raw", std::bind(&CarControlNode::imageCallback, this, std::placeholders::_1),
     transport_, rmw_qos_profile_sensor_data));
 
-    // image_timer_ = this->create_wall_timer(33ms, std::bind(&CarControlNode::imageCallback, this));
     image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/car_control/image_debug", rclcpp::SensorDataQoS());
     
     scan_image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/car_control/scan_debug", rclcpp::SensorDataQoS());
@@ -35,14 +20,6 @@ CarControlNode::CarControlNode() : Node("car_control_node")
         "/scan",
         rclcpp::SensorDataQoS(),
         std::bind(&CarControlNode::scanCallback, this, std::placeholders::_1));
-
-    detector_dict_ = cv::makePtr<cv::aruco::Dictionary>(
-        cv::aruco::getPredefinedDictionary(cv::aruco::DICT_APRILTAG_36h11));    
-    detector_params_ = cv::makePtr<cv::aruco::DetectorParameters>();
-
-    detector_params_->cornerRefinementMethod = cv::aruco::CORNER_REFINE_SUBPIX;
-
-    show_thread_ = std::thread(&CarControlNode::debugThread, this);
     
     tag_size = this->declare_parameter("tag_size", 0.08);
     cube_size = this->declare_parameter("cube_size", 0.15);
@@ -69,12 +46,6 @@ CarControlNode::CarControlNode() : Node("car_control_node")
     lidar_to_base_rotation_ =
         rpyToRotationMatrix(load_vec3_parameter("lidar_to_base.rpy"));
 
-    float half_len = tag_size / 2;
-    tag_def_point.emplace_back(cv::Point3f(-half_len, half_len, 0));
-    tag_def_point.emplace_back(cv::Point3f(half_len, half_len, 0));
-    tag_def_point.emplace_back(cv::Point3f(half_len, -half_len, 0));
-    tag_def_point.emplace_back(cv::Point3f(-half_len, -half_len, 0));
-
     // camera_matrix_ = (cv::Mat_<double>(3,3) << 
     //     504.504779, 0, 647.473284,
     //     0, 502.266322, 363.157317,
@@ -83,28 +54,68 @@ CarControlNode::CarControlNode() : Node("car_control_node")
     // dist_coeffs_ = (cv::Mat_<double>(1,5) << 0.003130, 0.002283, 0.001391, 0.001827, 0.0);
 
     camera_matrix_ = (cv::Mat_<double>(3,3) << 
-        1313.547983, 0, 644.967972,
-        0, 1306.233527, 490.556913,
+        1352.039377, 0, 642.538070,
+        0, 1345.311392, 512.435347,
         0, 0, 1);
 
-    dist_coeffs_ = (cv::Mat_<double>(1,5) << -0.077092, 0.194505, 0.001818, 0.000257, 0.0);
+    dist_coeffs_ = (cv::Mat_<double>(1,5) << -0.072975, 0.200117, 0.002497, 0.003193, 0.0);
+
+    cube_detector_params.camera_matrix_ = camera_matrix_;
+    cube_detector_params.dist_coeffs_ = dist_coeffs_;
+    cube_detector_params.camera_to_base_rotation_ = camera_to_base_rotation_;
+    cube_detector_params.camera_to_base_translation_ = camera_to_base_translation_;
+    cube_detector_params.cube_size_ = cube_size;
+    cube_detector_params.tag_size_ = tag_size;
+
+    cube_detector_ = std::make_unique<Detector>(cube_detector_params);
+
+    if (debug_mode_) {
+        show_thread_ = std::thread(&CarControlNode::debugThread, this);
+    }
+
     RCLCPP_INFO(this->get_logger(), "Success Init Car Control node!");
 }
 
+CarControlNode::~CarControlNode()
+{
+    debug_running_.store(false);
+    detector_running_.store(false);
+    if (show_thread_.joinable()) {
+        show_thread_.join();
+    }
+    if (detect_thread_.joinable()) {
+        detect_thread_.join();
+    }
+}
+
+/**
+ * @brief 指定多线程核
+ * @param cores 核ID
+ */
+void CarControlNode::bindThreadToCores(const std::vector<int>& cores)
+{
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+
+    for (int core : cores) {
+        CPU_SET(core, &cpuset);
+    }
+
+    int ret = pthread_setaffinity_np(pthread_self(),
+                                     sizeof(cpu_set_t),
+                                     &cpuset);
+
+    if (ret != 0) {
+        perror("pthread_setaffinity_np");
+    }
+}
+
+/**
+ * @brief 图像回调函数
+ * @param msg
+ */
 void CarControlNode::imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr msg)
 {
-
-    static int fps = 0;
-    static auto start_time = this->now();
-    auto t0 = this->now();
-
-    if(this->now() - start_time >= rclcpp::Duration::from_seconds(1.0)){
-        RCLCPP_INFO(this->get_logger(), "FPS: %d", fps);
-        fps = 0;
-        start_time = this->now();
-    }
-    fps++;
-
     cv::Mat frame;
     try{
         // 转换为 cv::Mat
@@ -117,209 +128,106 @@ void CarControlNode::imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr
                      "cv_bridge exception: %s", e.what());
     }
 
-    // cap_.grab();
-    // cap_.retrieve(frame);
-
     if (frame.empty()) {
         RCLCPP_WARN(this->get_logger(), "Empty frame");
         return;
     }
 
-    cv::Mat gray, bin;
-    cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
-    cv::medianBlur(gray, gray, 3);
-    cv::threshold(gray, bin, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
-
-    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3,3));
-    cv::morphologyEx(bin, bin, cv::MORPH_OPEN, kernel);
-    cv::morphologyEx(bin, bin, cv::MORPH_CLOSE, kernel);
-
-    // cv::imshow("Binary", bin);
-    // cv::waitKey(1);
-    
-    std::vector<int> marker_ids;
-    std::vector<std::vector<cv::Point2f>> marker_corners;
-    //全画面识别
-    cv::aruco::detectMarkers(
-        frame,
-        detector_dict_,
-        marker_corners,
-        marker_ids,
-        detector_params_);
-    
-    //筛选干扰框
-    std::vector<std::vector<cv::Point>> contours;
-    std::vector<cv::Vec4i> hierarchy;
-
-    cv::findContours(bin, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
-
-    std::vector<cv::Rect> candidate_rois;
-
-    for (size_t i = 0; i < contours.size(); i++)
-    {
-        std::vector<cv::Point> approx;
-        cv::approxPolyDP(contours[i], approx,
-            0.02 * cv::arcLength(contours[i], true), true);
-        //筛选矩形边框
-        if (approx.size() != 4) continue;
-        if (!cv::isContourConvex(approx)) continue;
-        
-        double area = cv::contourArea(approx);
-        if (area < 500) continue;
-        
-        //除去没有子边框
-        int child = hierarchy[i][2];
-        if (child == -1) continue;
-        
-        std::vector<cv::Point> approx_child;
-        cv::approxPolyDP(contours[child], approx_child,
-            0.02 * cv::arcLength(contours[child], true), true);
-
-        if (approx_child.size() != 4) continue;
-
-        double area_child = cv::contourArea(approx_child);
-        if (area_child < 600) continue;
-
-        cv::Rect roi = cv::boundingRect(approx);
-        roi &= cv::Rect(0, 0, frame.cols, frame.rows);
-
-        candidate_rois.push_back(roi);
-
-        // debug ROI
-        // cv::rectangle(frame, roi, cv::Scalar(200, 0, 200), 1);
+    if (!cube_detector_) {
+        RCLCPP_ERROR(this->get_logger(), "Cube detector is not initialized.");
+        return;
     }
-    //Roi内识别
-    for (auto &roi : candidate_rois)
-    {
-        cv::Mat sub = frame(roi);
+    //detector耗时统计
+    auto t0 = std::chrono::steady_clock::now();
 
-        std::vector<int> ids;
-        std::vector<std::vector<cv::Point2f>> corners;
+    //apriltag识别和cube位姿解算
+    const CubeDetectionResult detection = cube_detector_->detectCubes(frame);
 
-        cv::aruco::detectMarkers(
-            sub,
-            detector_dict_,
-            corners,
-            ids,
-            detector_params_);
+    auto t1 = std::chrono::steady_clock::now();
 
-        if (ids.empty()) continue;
-
-        for (size_t i = 0; i < corners.size(); i++)
-        {
-            // 坐标映射回原图
-            for (auto &pt : corners[i]) {
-                pt.x += roi.x;
-                pt.y += roi.y;
-            }
-
-            bool keep = true;
-            cv::Rect new_rect = cv::boundingRect(corners[i]);
-
-            for (size_t j = 0; j < marker_corners.size(); j++)
-            {
-                cv::Rect old_rect = cv::boundingRect(marker_corners[j]);
-
-                float inter = (new_rect & old_rect).area();
-                float uni = new_rect.area() + old_rect.area() - inter;
-
-                float iou = inter / uni;
-
-                if (iou > 0.3)
-                {
-                    if (new_rect.area() > old_rect.area()) {
-                        marker_ids[j] = ids[i];
-                        marker_corners[j] = corners[i];
-                    }
-                    keep = false;
-                    break;
-                }
-            }
-
-            if (keep) {
-                marker_ids.push_back(ids[i]);
-                marker_corners.push_back(corners[i]);
-            }
-        }
-    }
-    //debug
-    if (!marker_ids.empty()) {
-        // cv::aruco::drawDetectedMarkers(frame, marker_corners, marker_ids);
-        for(size_t i = 0; i < marker_ids.size(); i++)
-        {
-            cv::line(frame, marker_corners[i][0], marker_corners[i][1], cv::Scalar(0,255,0), 1);
-            cv::line(frame, marker_corners[i][1], marker_corners[i][2], cv::Scalar(0,255,0), 1);
-            cv::line(frame, marker_corners[i][2], marker_corners[i][3], cv::Scalar(0,255,0), 1);
-            cv::line(frame, marker_corners[i][3], marker_corners[i][0], cv::Scalar(0,255,0), 1);
-        }
-    }
-
-    auto groups = groupById(marker_ids);
-
-    std::vector<CubeState> cubes;
-    std::vector<CubeState> cubes_base;
-    cubes_base.reserve(groups.size());
-
-    for (auto &[id, indices] : groups)
-    {
-        CubeState cube = estimateCube(
-            id,
-            indices,
-            marker_corners,
-            tag_def_point,
-            camera_matrix_,
-            dist_coeffs_);
-
-        if (cube.valid) {
-            cubes.push_back(cube);
-            //转换到底盘坐标系
-            cubes_base.push_back(transformCubeToBase(cube));
-        }
-    }
-
+    //图像处理系统总延迟统计
     double latency = (this->now() - msg->header.stamp).seconds() * 1000.0;
+    double detect_time = std::chrono::duration<double, std::milli>(t1 - t0).count();
 
-    std::stringstream ss;
-    ss << "Latency: " << std::fixed << std::setprecision(2) << latency << " ms";
+    static int fps = 0;
+    static auto start_time = this->now();
+    static double total_latency = 0;
+    static double total_detect_time = 0;
 
-    cv::putText(frame, ss.str(),
-        cv::Point(10, 30),
-        cv::FONT_HERSHEY_SIMPLEX,
-        1.0,
-        cv::Scalar(0,255,0),
-        2);
+    total_latency += latency;
+    total_detect_time += detect_time;
 
+    //延迟信息打印
+    if(this->now() - start_time >= rclcpp::Duration::from_seconds(1.0)){
+        RCLCPP_INFO(this->get_logger(), "FPS: %d | latency: %f | detect_latency: %f", fps, total_latency / fps, total_detect_time / fps);
+        fps = 0;
+        start_time = this->now();
+        total_latency = 0;
+        total_detect_time = 0;
+    }
+    fps++;
+
+    //debug线程数据无锁拷贝
     if(debug_mode_)
     {
-        std::lock_guard<std::mutex> lock(img_mutex_);
-        latest_frame_ = frame;
-        new_frame_ = true;
-        cubes_ = cubes;
-        cubes_base_ = cubes_base;
+        int w = debug_write_index_.load(std::memory_order_release);
+
+        DebugPacket pkt;
+        pkt.frame = frame.empty() ? cv::Mat() : frame;
+        pkt.result = detection;
+        pkt.detector_latency = latency;
+        pkt.stamp = this->now();
+
+        {
+            std::lock_guard<std::mutex> lock(debug_mutex_);
+            pkt.laser_points = laser_points_base_;
+        }
+        debug_buffer[w] = pkt;
+
+        debug_frame_id_.fetch_add(1, std::memory_order_release);
+
+        int r = debug_read_index_.load(std::memory_order_relaxed);
+        debug_write_index_.store(r, std::memory_order_relaxed);
+        debug_read_index_.store(w, std::memory_order_relaxed);
     }
 }
 
+/**
+ *
+ * @brief debug线程，绘制debug数据
+ */
 void CarControlNode::debugThread()
 {
+    bindThreadToCores({6,7});
     cv::Mat img;
     std::vector<CubeState> cubes;
     std::vector<CubeState> cubes_base;
     std::vector<cv::Point3f> laser_points_base;
-    while (rclcpp::ok())
+    double detector_latency;
+    while (debug_running_.load(std::memory_order_relaxed) && rclcpp::ok())
     {
-        if(new_frame_ && debug_mode_){
-            {
-                std::lock_guard<std::mutex> lock(img_mutex_);
-            
-                if (!latest_frame_.empty()) {
-                    img = latest_frame_.clone();
-                    new_frame_ = false;
-                }
-                cubes = cubes_;
-                cubes_base = cubes_base_;
-                laser_points_base = laser_points_base_;
-            }
-        
+        static auto last = this->now();
+
+        if ((this->now() - last).seconds() < 0.05) { // 20Hz
+            continue;
+        }
+        last = this->now();
+
+        uint16_t cur = debug_frame_id_.load(std::memory_order_relaxed);
+        if (cur == last_debug_processed_id_.load(std::memory_order_relaxed)) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            continue;
+        }
+        last_debug_processed_id_.store(cur, std::memory_order_relaxed);
+        int r = debug_read_index_.load(std::memory_order_acquire);
+        DebugPacket pkt = debug_buffer[r];
+        if(debug_mode_){
+            img = pkt.frame;
+            cubes = pkt.result.cubes_camera;
+            cubes_base = pkt.result.cubes_base;
+            laser_points_base = pkt.laser_points;
+            detector_latency = pkt.detector_latency;
+
             if (!img.empty()) {
                 int image_width = img.cols;
                 int image_height = img.rows;
@@ -327,6 +235,15 @@ void CarControlNode::debugThread()
                 cv::line(img, cv::Point(image_width / 2, 0), cv::Point(image_width / 2, image_height), cv::Scalar(255,255,255), 1);
                 cv::line(img, cv::Point(0, image_height / 2), cv::Point(image_width, image_height / 2), cv::Scalar(255,255,255), 1);
                 cv::circle(img, cv::Point(image_width / 2, image_height / 2), 15, cv::Scalar(100,255,100), 1);
+                std::stringstream ss;
+                ss << "Latency: " << std::fixed << std::setprecision(2) << detector_latency << " ms";
+
+                cv::putText(img, ss.str(),
+                    cv::Point(10, 30),
+                    cv::FONT_HERSHEY_SIMPLEX,
+                    1.0,
+                    cv::Scalar(0,255,0),
+                    2);
                 // cv::imshow("Camera", img);
             }
         
@@ -337,10 +254,11 @@ void CarControlNode::debugThread()
             std_msgs::msg::Header header;
             header.stamp = this->now();
 
-
-            cv_bridge::CvImage debug_img(header, "bgr8", img);
-            auto image_msg = debug_img.toImageMsg();
-            image_publisher_->publish(*image_msg);
+            if (!img.empty()) {
+                cv_bridge::CvImage debug_img(header, "bgr8", img);
+                auto image_msg = debug_img.toImageMsg();
+                image_publisher_->publish(*image_msg);
+            }
             
             cv_bridge::CvImage scan_img(header, "bgr8", laser_scan_view);
             auto scan_msg = scan_img.toImageMsg();
@@ -351,6 +269,12 @@ void CarControlNode::debugThread()
     }
 }
 
+/**
+ * @brief 极坐标转笛卡尔坐标系
+ * @param range 长度
+ * @param angle_rad 角度
+ * @return  笛卡尔坐标系下的2D点
+ */
 cv::Point2f CarControlNode::polarToCartesian(float range, float angle_rad)
 {
     return cv::Point2f(
@@ -377,6 +301,11 @@ std::vector<cv::Point2f> CarControlNode::laserScanToCartesian(
     return points;
 }
 
+/**
+ *
+ * @brief 雷达消息回调函数
+ * @param msg
+ */
 void CarControlNode::scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
 {
     const std::vector<cv::Point2f> laser_points = laserScanToCartesian(*msg);
@@ -385,80 +314,16 @@ void CarControlNode::scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr m
         transformLaserPointsToBase(laser_points);
 
     {
-        std::lock_guard<std::mutex> lock(img_mutex_);
+        std::lock_guard<std::mutex> lock(debug_mutex_);
         laser_points_base_ = laser_points_base;
     }
 }
 
-std::unordered_map<int, std::vector<int>> CarControlNode::groupById(
-    const std::vector<int>& ids)
-{
-    std::unordered_map<int, std::vector<int>> groups;
-    for (size_t i = 0; i < ids.size(); i++) {
-        groups[ids[i]].push_back(i);
-    }
-    return groups;
-}
-
-CubeState CarControlNode::estimateCube(
-    int id,
-    const std::vector<int>& indices,
-    const std::vector<std::vector<cv::Point2f>>& corners,
-    const std::vector<cv::Point3f>& tag_def_point,
-    const cv::Mat& camera_matrix,
-    const cv::Mat& dist_coeffs)
-{
-    CubeState cube;
-    cube.id = id;
-
-    std::vector<cv::Point3f> centers;
-    std::vector<cv::Mat> rvecs;
-
-    for (auto idx : indices) {
-        cv::Mat rvec, tvec;
-
-        if (!cv::solvePnP(tag_def_point, corners[idx], camera_matrix, dist_coeffs, rvec, tvec, false, cv::SOLVEPNP_IPPE))
-            continue;
-
-        TagPose tag;
-        tag.id = id;
-        tag.rvec = rvec;
-        tag.tvec = tvec;
-
-        cv::Mat R;
-        cv::Rodrigues(rvec, R);
-
-        double d = cube_size / 2;  // 立方体半尺寸
-        cv::Mat center_mat = tvec - d * R.col(2);
-
-        tag.center = cv::Point3f(
-            center_mat.at<double>(0),
-            center_mat.at<double>(1),
-            center_mat.at<double>(2));
-
-        centers.push_back(tag.center);
-        rvecs.push_back(rvec);
-        cube.tags.push_back(tag);
-    }
-
-    if (centers.empty()) return cube;
-
-    // 平均中心
-    cv::Point3f avg(0,0,0);
-    for (auto &c : centers) avg += c;
-    avg *= (1.0 / centers.size());
-
-    cube.center = avg;
-    cube.tvec = (cv::Mat_<double>(3,1) << avg.x, avg.y, avg.z);
-    cube.rvec = rvecs[0];
-
-    // 暂时用第一个姿态
-    cv::Rodrigues(rvecs[0], cube.R);
-
-    cube.valid = true;
-    return cube;
-}
-
+/**
+ * @brief 欧拉角转旋转矩阵
+ * @param rpy
+ * @return cv3x3矩阵
+ */
 cv::Matx33d CarControlNode::rpyToRotationMatrix(const cv::Vec3d& rpy)
 {
     const double roll = rpy[0];
@@ -490,6 +355,14 @@ cv::Matx33d CarControlNode::rpyToRotationMatrix(const cv::Vec3d& rpy)
     return rotation_z * rotation_y * rotation_x;
 }
 
+/**
+ *
+ * @brief 三维点坐标系变换函数
+ * @param point 需要转换的三维点
+ * @param rotation 旋转矩阵
+ * @param translation 平移矩阵
+ * @return 按照旋转矩阵和平移矩阵转换后的三维点
+ */
 cv::Point3f CarControlNode::transformPoint(
     const cv::Point3f& point,
     const cv::Matx33d& rotation,
@@ -504,53 +377,11 @@ cv::Point3f CarControlNode::transformPoint(
         static_cast<float>(transformed[2]));
 }
 
-CubeState CarControlNode::transformCubeToBase(const CubeState& cube) const
-{
-    CubeState transformed_cube;
-    transformed_cube.id = cube.id;
-    transformed_cube.valid = cube.valid;
-    transformed_cube.center = transformPoint(
-        cube.center,
-        camera_to_base_rotation_,
-        camera_to_base_translation_);
-
-    transformed_cube.tvec = (cv::Mat_<double>(3, 1) <<
-        transformed_cube.center.x,
-        transformed_cube.center.y,
-        transformed_cube.center.z);
-
-    if (!cube.R.empty()) {
-        transformed_cube.R = cv::Mat(camera_to_base_rotation_) * cube.R;
-        cv::Rodrigues(transformed_cube.R, transformed_cube.rvec);
-    }
-
-    transformed_cube.tags.reserve(cube.tags.size());
-    for (const auto& source_tag : cube.tags) {
-        TagPose transformed_tag;
-        transformed_tag.id = source_tag.id;
-        transformed_tag.center = transformPoint(
-            source_tag.center,
-            camera_to_base_rotation_,
-            camera_to_base_translation_);
-
-        transformed_tag.tvec = (cv::Mat_<double>(3, 1) <<
-            transformed_tag.center.x,
-            transformed_tag.center.y,
-            transformed_tag.center.z);
-
-        if (!source_tag.rvec.empty()) {
-            cv::Mat tag_rotation;
-            cv::Rodrigues(source_tag.rvec, tag_rotation);
-            tag_rotation = cv::Mat(camera_to_base_rotation_) * tag_rotation;
-            cv::Rodrigues(tag_rotation, transformed_tag.rvec);
-        }
-
-        transformed_cube.tags.push_back(std::move(transformed_tag));
-    }
-
-    return transformed_cube;
-}
-
+/**
+ *
+ * @param laser_points 等待转换的点
+ * @return 转换后的雷达点集
+ */
 std::vector<cv::Point3f> CarControlNode::transformLaserPointsToBase(
     const std::vector<cv::Point2f>& laser_points) const
 {
@@ -567,6 +398,12 @@ std::vector<cv::Point3f> CarControlNode::transformLaserPointsToBase(
     return transformed_points;
 }
 
+/**
+ *
+ * @brief 绘制x标在图像上
+ * @param p 绘制坐标
+ * @param frame 需要绘制的图像
+ */
 void drawX(cv::Point2f p, cv::Mat& frame){
     cv::line(frame, p + cv::Point2f(-30, -30), p + cv::Point2f(30, 30), cv::Scalar(0,0,255), 1);
     cv::line(frame, p + cv::Point2f(-30, 30), p + cv::Point2f(30, -30), cv::Scalar(0,0,255), 1);
@@ -623,10 +460,10 @@ void CarControlNode::drawCubes(
                 cv::Scalar(0,0,255),
                 1);
         }
-        if(cube.id == 0){
+        if(cube.id == 0 && !center2d.empty()){
             drawX(center2d[0], frame);
-
         }
+        if (cube.R.empty()) continue;
 
         float l = cube_size / 2.0;
 
@@ -689,15 +526,15 @@ void CarControlNode::drawCubes(
                 1);
         }
 
-        for (auto &tag : cube.tags)
-        {
-            cv::drawFrameAxes(frame,
-                camera_matrix,
-                dist_coeffs,
-                tag.rvec,
-                tag.tvec,
-                0.04);
-        }
+        // for (auto &tag : cube.tags)
+        // {
+        //     cv::drawFrameAxes(frame,
+        //         camera_matrix,
+        //         dist_coeffs,
+        //         tag.rvec,
+        //         tag.tvec,
+        //         0.04);
+        // }
     }
 }
 
@@ -816,11 +653,11 @@ cv::Mat CarControlNode::buildLaserScanView(
 
 int main(int argc, char *argv[])
 {
-  rclcpp::init(argc, argv);
-  rclcpp::executors::MultiThreadedExecutor executor;
-  auto node = std::make_shared<CarControlNode>();
-  executor.add_node(node);
-  executor.spin();
-  rclcpp::shutdown();
-  return 0;
+    rclcpp::init(argc, argv);
+    rclcpp::executors::SingleThreadedExecutor executor;
+    auto node = std::make_shared<CarControlNode>();
+    executor.add_node(node);
+    executor.spin();
+    rclcpp::shutdown();
+    return 0;
 }

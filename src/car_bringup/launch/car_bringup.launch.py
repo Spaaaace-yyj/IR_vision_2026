@@ -13,7 +13,6 @@ from launch.substitutions import PathJoinSubstitution
 
 
 def generate_launch_description():
-    # ===== 路径 =====
     car_control_launch = os.path.join(
         get_package_share_directory("car_control"),
         "launch",

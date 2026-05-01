@@ -15,16 +15,22 @@ if(POLICY CMP0069)
   cmake_policy(SET CMP0069 NEW)
 endif()
 
-set(OpenCV_DIR /usr/local/lib/cmake/opencv4)
-
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(OpenCV REQUIRED)
+set(OpenCV_DIR /usr/local/lib/cmake/opencv4 CACHE PATH "OpenCV 4.8 config path" FORCE)
+find_package(OpenCV REQUIRED CONFIG)
 find_package(cv_bridge REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(image_transport REQUIRED)
 
+include_directories(
+        /usr/local/include/apriltag
+)
+
+link_directories(
+        /usr/local/lib
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -40,6 +46,11 @@ endif()
 
 add_executable(car_control src/car_control_node.cpp src/tag_detector.cpp)
 ament_target_dependencies(car_control rclcpp sensor_msgs OpenCV cv_bridge image_transport)
+
+target_link_libraries(car_control
+        ${OpenCV_LIBS}
+        apriltag
+)
 
 if(CAR_CONTROL_ENABLE_NATIVE_OPTIMIZATION AND NOT CMAKE_CROSSCOMPILING AND
    CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

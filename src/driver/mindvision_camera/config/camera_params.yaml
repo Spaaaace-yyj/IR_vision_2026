@@ -5,9 +5,9 @@
     camera_name: mv_camera
     frame_id: "camera_optical_frame"
     # exposure_time: 4000
-    exposure_time: 8000
+    exposure_time: 6000
     flip_image: false
-    gamma: 80
+    gamma: 60
     rgb_gain:
       b: 100
       g: 120
