@@ -10,7 +10,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.substitutions import FindPackageShare
 from launch.substitutions import PathJoinSubstitution
-
+from launch_ros.actions import Node
 
 def generate_launch_description():
     car_control_launch = os.path.join(
@@ -126,6 +126,13 @@ def generate_launch_description():
                 "angle_compensate": lidar_angle_compensate,
                 "scan_mode": lidar_scan_mode,
             }.items(),
+        ),
+
+        Node(
+            package="lc_serial_test",
+            executable="lc_serial_test",
+            name="lc_serial_test",
+            output="screen",
         ),
 
         # ===== 启动 MindVision 相机 =====

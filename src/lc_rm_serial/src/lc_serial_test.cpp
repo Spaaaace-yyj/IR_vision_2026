@@ -79,6 +79,11 @@ void LcSerialTestNode::OpenPort(){
 void LcSerialTestNode::DecodeData(){
     uint16_t flags_register;
     get_protocol_info(buffer.data(), &flags_register, (uint8_t *)&recv_data.yaw);
+
+    auto_aim_interfaces::msg::McuFeedBack feed_msg;
+    feed_msg.yaw = recv_data.yaw;
+
+    mcu_msg_pub_->publish(feed_msg);
 }
 
 void LcSerialTestNode::SendData(){
@@ -125,6 +130,15 @@ void LcSerialTestNode::receiveLoop()
             };
 
             if(buffer[0] == 0xA5){
+                // std::cout << "receive [" << n << " byte] data : ";
+                // for (size_t i = 0; i < n; i++){
+                //     std::cout << std::hex
+                //     << std::setw(2)
+                //     << std::setfill('0')
+                //     << static_cast<int>(buffer[i])
+                //     << " ";
+                // }
+                // std::cout << std::dec << std::endl;
                 DecodeData();
             }else{
                 RCLCPP_WARN(this->get_logger(), "Can't find CMD_ID! skip this loop!");

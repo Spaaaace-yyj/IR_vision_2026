@@ -144,22 +144,6 @@ void CarControlNode::imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr
     //apriltag识别和cube位姿解算
     const CubeDetectionResult detection = cube_detector_->detectCubes(frame);
     cube_state_ = detection;
-    CubeState target_cube;
-    for (size_t i = 0; i < cube_state_.cubes_base.size(); i++) {
-        if (cube_state_.cubes_base[i].id == 0) {
-            target_cube = cube_state_.cubes_base[i];
-            break;
-        }
-        if (cube_state_.cubes_base[i].id == 1 && is_blue) {
-            target_cube = cube_state_.cubes_base[i];
-        }
-        if (cube_state_.cubes_base[i].id == 2 && !is_blue) {
-            target_cube = cube_state_.cubes_base[i];
-        }
-    }
-
-    float target_yaw = projectAndComputeAngle(target_cube.center);
-    RCLCPP_INFO(this->get_logger(), "target_yaw = %f", target_yaw);
 
     auto t1 = std::chrono::steady_clock::now();
 
@@ -211,6 +195,40 @@ void CarControlNode::imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr
 }
 
 void CarControlNode::mcuCallback(const auto_aim_interfaces::msg::McuFeedBack::SharedPtr msg) {
+    CubeState target_cube;
+    if (!cube_state_.cubes_base.empty()) {
+        for (size_t i = 0; i < cube_state_.cubes_base.size(); i++) {
+            if (cube_state_.cubes_base[i].id == 0) {
+                target_cube = cube_state_.cubes_base[i];
+                break;
+            }
+            if (cube_state_.cubes_base[i].id == 1 && is_blue) {
+                target_cube = cube_state_.cubes_base[i];
+            }
+            if (cube_state_.cubes_base[i].id == 2 && !is_blue) {
+                target_cube = cube_state_.cubes_base[i];
+            }
+        }
+        target_yaw_ = projectAndComputeAngle(target_cube.center) * (180.0f / M_PI);
+        is_tracing_ = target_cube.id;
+    }else {
+        target_yaw_ = 0.0f;
+        is_tracing_ = -1.0f;
+    }
+
+    auto_aim_interfaces::msg::Cmd cmd_msg;
+    cmd_msg.target_yaw = target_yaw_ + msg->yaw;
+    while (cmd_msg.target_yaw > 180.0f) {
+        cmd_msg.target_yaw -= 360.0f;
+    }
+    while (cmd_msg.target_yaw < -180.0f) {
+        cmd_msg.target_yaw += 360.0f;
+    }
+
+    cmd_msg.tracing = is_tracing_;
+
+    control_cmd_publisher_->publish(cmd_msg);
+    // RCLCPP_INFO(this->get_logger(), "target_yaw = %f | is_tracing = %f", cmd_msg.target_yaw, is_tracing_);
 
 }
 
@@ -310,7 +328,7 @@ void CarControlNode::scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr m
 }
 
 float CarControlNode::projectAndComputeAngle(const cv::Point3f &p) {
-    return std::atan2(p.y, p.x);
+    return std::atan2(p.y, -p.x);
 }
 
 /**

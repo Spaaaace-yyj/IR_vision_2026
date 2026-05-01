@@ -94,6 +94,8 @@ private:
     float cube_size = 0.15; //m
 
     CubeDetectionResult cube_state_;
+    float target_yaw_ = 0.0f;
+    float is_tracing_ = -1.0f;
     bool is_blue = false;
 
 private:
