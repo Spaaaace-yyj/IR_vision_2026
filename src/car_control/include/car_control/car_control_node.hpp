@@ -20,10 +20,33 @@
 #include <atomic>
 #include <vector>
 
+#include <eigen3/Eigen/Dense>
+
 #include "tag_detector.hpp"
 #include "auto_aim_interfaces/msg/mcu_feed_back.hpp"
 
 using namespace std::chrono_literals;
+
+enum RobotState {
+    SEARCHING_TARGET,
+    TRACING,
+    SEARCH_TABLE,
+    RETURNING_TABLE
+};
+
+struct LineFeature
+{
+    bool valid = false;
+
+    Eigen::Vector2f center;
+
+    Eigen::Vector2f tangent;
+    Eigen::Vector2f normal;
+
+    float length = 0.0f;
+
+    int cluster_id = -1;
+};
 
 //多线程通讯
 struct DebugPacket {
@@ -41,9 +64,16 @@ public:
     CarControlNode();
     ~CarControlNode() override;
 
+    //callback
     void imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr msg);
 
     void mcuCallback(const auto_aim_interfaces::msg::McuFeedBack::SharedPtr msg);
+
+    void scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
+
+    void changeState(RobotState new_state);
+
+    void updateFSM();
 
     void drawCubes(
     cv::Mat& frame,
@@ -51,21 +81,18 @@ public:
     const cv::Mat& camera_matrix,
     const cv::Mat& dist_coeffs);
 
+    void drawX(cv::Point2f p, cv::Mat& frame);
+
     static cv::Point2f polarToCartesian(float range, float angle_rad);
 
-    static std::vector<cv::Point2f> laserScanToCartesian(const sensor_msgs::msg::LaserScan& scan);
+    std::vector<cv::Point2f> laserScanToCartesian(const sensor_msgs::msg::LaserScan& scan);
 
     static cv::Mat buildLaserScanView(
         const std::vector<cv::Point3f>& points,
+        const std::vector<std::vector<cv::Point2f>>& clusters,
+        const std::vector<LineFeature>& lines,
         const std::vector<CubeState>& cubes,
         int image_size = 1000);
-
-    void scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
-
-    void debugThread();
-
-private:
-    void bindThreadToCores(const std::vector<int>& cores);
 
     static cv::Matx33d rpyToRotationMatrix(const cv::Vec3d& rpy);
 
@@ -77,7 +104,34 @@ private:
     std::vector<cv::Point3f> transformLaserPointsToBase(
     const std::vector<cv::Point2f>& laser_points) const;
 
+    LineFeature fitLinePCA(const std::vector<cv::Point2f>& cluster);
+
     float projectAndComputeAngle(const cv::Point3f& p);
+
+    std::vector<std::vector<cv::Point2f> > clusterLaserPoints(
+    const std::vector<cv::Point2f>& points,
+    float threshold);
+
+    cv::Point2f transformPointToYawWorld(
+        const cv::Point2f &p,
+        float yaw);
+
+    std::vector<cv::Point2f>transformPointsToYawWorld(
+        const std::vector<cv::Point2f> &points,
+        float yaw);
+
+    float pointLineDistance(
+    const cv::Point2f& p,
+    const cv::Point2f& a,
+    const cv::Point2f& b);
+
+    void debugThread();
+
+    void bindThreadToCores(const std::vector<int>& cores);
+
+private:
+
+    RobotState current_state;
 
     CubeDetectParams cube_detector_params;
     std::unique_ptr<Detector> cube_detector_;
@@ -124,6 +178,12 @@ private:
     std::vector<CubeState> cubes_;
     std::vector<CubeState> cubes_base_;
     std::vector<cv::Point3f> laser_points_base_;
+    std::vector<std::vector<cv::Point2f>> cluster_points_;
+    std::vector<LineFeature> point_line_;
+
+    float car_yaw_rad = 0.0f;
+
+    bool down_state = false;
 
     bool debug_mode_ = true;
 };
