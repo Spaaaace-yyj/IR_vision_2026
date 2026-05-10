@@ -5,16 +5,17 @@
 #include <iomanip>
 #include <sstream>
 
-CarControlNode::CarControlNode() : Node("car_control_node")
-{
+CarControlNode::CarControlNode() : Node("car_control_node") {
     std::string transport_ = this->declare_parameter("subscribe_compressed", false) ? "compressed" : "raw";
     img_sub_ = std::make_shared<image_transport::Subscriber>(image_transport::create_subscription(
-    this, "/image_raw", std::bind(&CarControlNode::imageCallback, this, std::placeholders::_1),
-    transport_, rmw_qos_profile_sensor_data));
+        this, "/image_raw", std::bind(&CarControlNode::imageCallback, this, std::placeholders::_1),
+        transport_, rmw_qos_profile_sensor_data));
 
-    image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/car_control/image_debug", rclcpp::SensorDataQoS());
-    
-    scan_image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/car_control/scan_debug", rclcpp::SensorDataQoS());
+    image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/car_control/image_debug",
+                                                                       rclcpp::SensorDataQoS());
+
+    scan_image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>(
+        "/car_control/scan_debug", rclcpp::SensorDataQoS());
     control_cmd_publisher_ = this->create_publisher<auto_aim_interfaces::msg::Cmd>("control/car_cmd_vel", 1);
 
     mcu_feedback_sub_ = this->create_subscription<auto_aim_interfaces::msg::McuFeedBack>(
@@ -25,12 +26,12 @@ CarControlNode::CarControlNode() : Node("car_control_node")
         "/scan",
         rclcpp::SensorDataQoS(),
         std::bind(&CarControlNode::scanCallback, this, std::placeholders::_1));
-    
+
     tag_size = this->declare_parameter("tag_size", 0.08);
     cube_size = this->declare_parameter("cube_size", 0.15);
 
-    const auto load_vec3_parameter = [this](const std::string& name) {
-        std::vector<double> values = this->declare_parameter<std::vector<double>>(
+    const auto load_vec3_parameter = [this](const std::string &name) {
+        std::vector<double> values = this->declare_parameter<std::vector<double> >(
             name, {0.0, 0.0, 0.0});
 
         if (values.size() != 3) {
@@ -46,24 +47,17 @@ CarControlNode::CarControlNode() : Node("car_control_node")
 
     camera_to_base_translation_ = load_vec3_parameter("camera_to_base.translation");
     camera_to_base_rotation_ =
-        rpyToRotationMatrix(load_vec3_parameter("camera_to_base.rpy"));
+            rpyToRotationMatrix(load_vec3_parameter("camera_to_base.rpy"));
     lidar_to_base_translation_ = load_vec3_parameter("lidar_to_base.translation");
     lidar_to_base_rotation_ =
-        rpyToRotationMatrix(load_vec3_parameter("lidar_to_base.rpy"));
+            rpyToRotationMatrix(load_vec3_parameter("lidar_to_base.rpy"));
 
-    // camera_matrix_ = (cv::Mat_<double>(3,3) << 
-    //     504.504779, 0, 647.473284,
-    //     0, 502.266322, 363.157317,
-    //     0, 0, 1);
+    camera_matrix_ = (cv::Mat_<double>(3, 3) <<
+                      1352.039377, 0, 642.538070,
+                      0, 1345.311392, 512.435347,
+                      0, 0, 1);
 
-    // dist_coeffs_ = (cv::Mat_<double>(1,5) << 0.003130, 0.002283, 0.001391, 0.001827, 0.0);
-
-    camera_matrix_ = (cv::Mat_<double>(3,3) << 
-        1352.039377, 0, 642.538070,
-        0, 1345.311392, 512.435347,
-        0, 0, 1);
-
-    dist_coeffs_ = (cv::Mat_<double>(1,5) << -0.072975, 0.200117, 0.002497, 0.003193, 0.0);
+    dist_coeffs_ = (cv::Mat_<double>(1, 5) << -0.072975, 0.200117, 0.002497, 0.003193, 0.0);
 
     cube_detector_params.camera_matrix_ = camera_matrix_;
     cube_detector_params.dist_coeffs_ = dist_coeffs_;
@@ -81,8 +75,7 @@ CarControlNode::CarControlNode() : Node("car_control_node")
     RCLCPP_INFO(this->get_logger(), "Success Init Car Control node!");
 }
 
-CarControlNode::~CarControlNode()
-{
+CarControlNode::~CarControlNode() {
     debug_running_.store(false);
     if (show_thread_.joinable()) {
         show_thread_.join();
@@ -93,16 +86,13 @@ CarControlNode::~CarControlNode()
  * @brief 图像回调函数
  * @param msg
  */
-void CarControlNode::imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr msg)
-{
+void CarControlNode::imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr msg) {
     cv::Mat frame;
-    try{
+    try {
         // 转换为 cv::Mat
         auto cv_ptr = cv_bridge::toCvShare(msg, "bgr8");
         frame = cv_ptr->image;
-    }
-    catch (cv_bridge::Exception &e)
-    {
+    } catch (cv_bridge::Exception &e) {
         RCLCPP_ERROR(this->get_logger(),
                      "cv_bridge exception: %s", e.what());
     }
@@ -138,8 +128,9 @@ void CarControlNode::imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr
     total_detect_time += detect_time;
 
     //延迟信息打印
-    if(this->now() - start_time >= rclcpp::Duration::from_seconds(1.0)){
-        RCLCPP_INFO(this->get_logger(), "FPS: %d | latency: %f | detect_latency: %f", fps, total_latency / fps, total_detect_time / fps);
+    if (this->now() - start_time >= rclcpp::Duration::from_seconds(1.0)) {
+        RCLCPP_INFO(this->get_logger(), "FPS: %d | latency: %f | detect_latency: %f", fps, total_latency / fps,
+                    total_detect_time / fps);
         fps = 0;
         start_time = this->now();
         total_latency = 0;
@@ -148,8 +139,7 @@ void CarControlNode::imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr
     fps++;
 
     //debug线程数据无锁拷贝
-    if(debug_mode_)
-    {
+    if (debug_mode_) {
         int w = debug_write_index_.load(std::memory_order_release);
 
         DebugPacket pkt;
@@ -173,11 +163,290 @@ void CarControlNode::imageCallback(const sensor_msgs::msg::Image::ConstSharedPtr
 }
 
 /**
+ *
+ * @brief 雷达消息回调函数
+ * @param msg
+ */
+void CarControlNode::scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
+    std::vector<cv::Point2f> laser_points;
+    if (down_state) {
+        laser_points = transformPointsToYawWorld(laserScanToCartesian(*msg), car_yaw_rad);
+    } else {
+        laser_points = laserScanToCartesian(*msg);
+    }
+
+    //转换到底盘坐标系
+    const std::vector<cv::Point3f> laser_points_base =
+            transformLaserPointsToBase(laser_points);
+    //点云聚类
+    std::vector<std::vector<cv::Point2f> > cluster_points = clusterLaserPoints(laser_points, 0.10f);
+    std::vector<LineFeature> point_line;
+
+    for (size_t i = 0; i < cluster_points.size(); i++) {
+        point_line.push_back(fitLinePCA(cluster_points[i]));
+    }
+
+    if (current_state == SEARCH_TABLE) {
+        float front_min_yaw = 10000.0f;
+        float back_min_yaw = 10000.0f;
+        int front_target_line_idx = -1;
+        int back_target_line_idx = -1;
+        for (size_t i = 0; i < point_line.size(); i++) {
+            float line_yaw = std::abs(projectAndComputeAngle(point_line[i].normal, NEG_X) * RED2DEG);
+            if (point_line[i].center.x() <= 0) {
+                if (front_min_yaw > line_yaw) {
+                    front_min_yaw = line_yaw;
+                    front_target_line_idx = i;
+                }
+            }
+            if (point_line[i].center.x() >= 0) {
+                if (back_min_yaw > line_yaw) {
+                    back_min_yaw = line_yaw;
+                    back_target_line_idx = i;
+                }
+            }
+        }
+        if (front_target_line_idx != -1) {
+            point_line[front_target_line_idx].valid = true;
+        }
+        if (back_target_line_idx != -1) {
+            point_line[back_target_line_idx].valid = true;
+        }
+        LineFeature front_line = point_line[front_target_line_idx];
+        LineFeature back_line = point_line[back_target_line_idx];
+        float f_yaw = projectAndComputeAngle(point_line[front_target_line_idx].normal, NEG_X) * RED2DEG;
+        float b_yaw = projectAndComputeAngle(point_line[back_target_line_idx].normal, NEG_X) * RED2DEG;
+
+        //神秘复杂屎山状态机，先测试这个方法能不能实现，再找人优化吧QWQ
+        switch (search_table_state) {
+            case IDLE:
+                search_table_state = ALIGN_WALL;
+                break;
+            case ALIGN_WALL:
+                //不断更新目标值
+                if (back_target_line_idx != -1) {
+                    car_cmd.target_yaw = car_yaw_deg + b_yaw;
+                    car_cmd.target_speed = 0.0f;
+                }else if (front_target_line_idx != -1) {
+                    car_cmd.target_yaw = car_yaw_deg + f_yaw;
+                    car_cmd.target_speed = 0.0f;
+                }
+                //状态切换判断
+                if (back_target_line_idx != -1 || front_target_line_idx != -1) {
+                    //当已经垂直墙
+                    if (std::abs(b_yaw) <= 15.0f) {
+                        //如果前后墙出现大于走廊宽度的距离，认为车现在面朝走廊长方向
+                        if (front_line.center.norm() > 0.8f || back_line.center.norm() > 0.8f) {
+                            //让车旋转90度
+                            car_cmd.target_yaw = car_yaw_deg + b_yaw + 90.0f;
+                            search_table_state = CHANGE_WALL;
+                            break;
+                        }else {
+                            //如果没有超过宽度的墙，就认为车方向对了，开始检查屁股是不是朝向内
+                            search_table_state = CHECK_IS_INSIDE;
+                            break;
+                        }
+                    }
+                }
+                break;
+            case CHECK_IS_INSIDE:
+                //倒车，用车后面的测距传感器顶住墙
+                car_cmd.target_speed = -1000;
+                //接入传感器判断（通信还没测试，先留空）
+                // if () {
+                //     如果传感器检测到方向正确
+                //     车前进保持2秒，让车头顶住外墙
+                //     然后进入冲台阶模式
+                // }else {
+                //     如果不满足，旋转180度
+                //     search_table_state = TURN_ROUND;
+                // }
+
+                break;
+            case CHANGE_WALL:
+                //旋转90度，如果旋转到了就跳回继续判断
+                if (std::abs(car_yaw_deg - car_cmd.target_yaw) < 15.0f) {
+                    search_table_state = ALIGN_WALL;
+                }
+                break;
+            case TURN_ROUND:
+                if (std::abs(car_yaw_deg - car_cmd.target_yaw) < 15.0f) {
+                    search_table_state = CHECK_IS_INSIDE;
+                }
+                break;
+            case MOVE_TO_CENTER:
+                break;
+            case ADJUST_DISTANCE:
+                break;
+            default:
+                break;
+        }
+
+        RCLCPP_INFO(this->get_logger(), "f = %f, b = %f, target = %f, state = %d", f_yaw, b_yaw, car_cmd.target_yaw, search_table_state);
+    }
+
+    if (debug_mode_) {
+        std::lock_guard<std::mutex> lock(debug_mutex_);
+        laser_points_base_ = laser_points_base;
+        cluster_points_ = cluster_points;
+        point_line_ = point_line;
+    } else {
+        laser_points_base_ = laser_points_base;
+        cluster_points_ = cluster_points;
+        point_line_ = point_line;
+    }
+}
+
+void CarControlNode::updateTableFSM() {
+
+}
+
+void CarControlNode::updateUpTableEvent() {
+
+}
+
+void CarControlNode::changeUpTableState(SearchTableState new_state) {
+
+}
+
+
+/**
  * @brief 单片机消息回调函数
  * @param msg
  */
 void CarControlNode::mcuCallback(const auto_aim_interfaces::msg::McuFeedBack::SharedPtr msg) {
 
+    car_yaw_deg = msg->yaw;
+    car_yaw_rad = car_yaw_deg * (M_PI / 180.0f);
+
+    updateFSM();
+}
+
+void CarControlNode::updateFSM() {
+    static int tracing_count = 0;
+    static int lost_count = 0;
+    if (feed_state == FALL_TABLE) {
+        changeState(SEARCH_TABLE);
+        updateEvent();
+        return;
+    }
+    switch (current_state) {
+        case SEARCHING_TARGET:
+            if (CheckFindTarget()) {
+                tracing_count++;
+            }else {
+                tracing_count = 0;
+            }
+            if (tracing_count >= 3) {
+                changeState(TRACING);
+            }
+            break;
+        case TRACING:
+            tracing_count = 0;
+            if (!CheckFindTarget()) {
+                lost_count++;
+            }else {
+                lost_count = 0;
+            }
+            if (lost_count >= 3) {
+                changeState(SEARCHING_TARGET);
+            }
+            break;
+        case SEARCH_TABLE:
+
+            break;
+        case READY_TO_PUSH:
+
+            break;
+        default:
+            break;
+    }
+    updateEvent();
+}
+
+void CarControlNode::changeState(RobotState new_state) {
+    if (current_state == new_state) {
+        return;
+    }
+
+    DebugFSMStateChangeInfo(new_state);
+
+    car_cmd = {
+        .target_yaw = 0.0f,
+        .target_speed = 0.0f,
+        .wall_yaw_offset = 0.0f,
+    };
+
+    current_state = new_state;
+}
+
+void CarControlNode::updateEvent() {
+    switch (current_state) {
+        case SEARCHING_TARGET: {
+            //单片机处理搜寻逻辑，上位机不需要做处理，但是要发布东西
+            auto_aim_interfaces::msg::Cmd cmd_msg;
+            cmd_msg.target_yaw = car_yaw_deg;
+            while (cmd_msg.target_yaw > 180.0f) {
+                cmd_msg.target_yaw -= 360.0f;
+            }
+            while (cmd_msg.target_yaw < -180.0f) {
+                cmd_msg.target_yaw += 360.0f;
+            }
+
+            cmd_msg.tracing = -1;
+            cmd_msg.cmd_state = 0;
+
+            control_cmd_publisher_->publish(cmd_msg);
+        }
+        break;
+        case TRACING: {
+            pubTargetCube();
+        }
+        break;
+        case SEARCH_TABLE: {
+            auto_aim_interfaces::msg::Cmd cmd_msg;
+            cmd_msg.target_yaw = car_cmd.target_yaw;
+            while (cmd_msg.target_yaw > 180.0f) {
+                cmd_msg.target_yaw -= 360.0f;
+            }
+            while (cmd_msg.target_yaw < -180.0f) {
+                cmd_msg.target_yaw += 360.0f;
+            }
+            cmd_msg.car_speed = car_cmd.target_speed;
+            cmd_msg.tracing = -1;
+            cmd_msg.cmd_state = 2;
+
+            control_cmd_publisher_->publish(cmd_msg);
+        }
+        break;
+        case READY_TO_PUSH: {
+        }
+        break;
+        default:
+            break;
+    }
+}
+
+bool CarControlNode::CheckFindTarget() const{
+    if (!cube_state_.cubes_base.empty()) {
+        for (size_t i = 0; i < cube_state_.cubes_base.size(); i++) {
+            if (cube_state_.cubes_base[i].id == 0) {
+                return true;
+            }
+            if (cube_state_.cubes_base[i].id == 1 && is_blue) {
+                return true;
+            }
+            if (cube_state_.cubes_base[i].id == 2 && !is_blue) {
+                return true;
+            }
+        }
+    } else {
+        return false;
+    }
+    return false;
+}
+
+void CarControlNode::pubTargetCube() {
     CubeState target_cube;
     if (!cube_state_.cubes_base.empty()) {
         for (size_t i = 0; i < cube_state_.cubes_base.size(); i++) {
@@ -192,15 +461,16 @@ void CarControlNode::mcuCallback(const auto_aim_interfaces::msg::McuFeedBack::Sh
                 target_cube = cube_state_.cubes_base[i];
             }
         }
-        target_yaw_ = projectAndComputeAngle(target_cube.center) * (180.0f / M_PI);
+        target_yaw_ = projectAndComputeAngle(target_cube.center, NEG_X) * (180.0f / M_PI);
         is_tracing_ = target_cube.id;
-    }else {
-        target_yaw_ = 0.0f;
-        is_tracing_ = -1.0f;
+    } else {
+        //状态机写了丢失处理，短暂丢失保留丢失前的数据，故这个先注释掉，测试后删除
+        // target_yaw_ = 0.0f;
+        // is_tracing_ = -1.0f;
     }
 
     auto_aim_interfaces::msg::Cmd cmd_msg;
-    cmd_msg.target_yaw = target_yaw_ + msg->yaw;
+    cmd_msg.target_yaw = target_yaw_ + car_yaw_deg;
     while (cmd_msg.target_yaw > 180.0f) {
         cmd_msg.target_yaw -= 360.0f;
     }
@@ -209,78 +479,12 @@ void CarControlNode::mcuCallback(const auto_aim_interfaces::msg::McuFeedBack::Sh
     }
 
     cmd_msg.tracing = is_tracing_;
+    cmd_msg.cmd_state = 1;
+    cmd_msg.car_speed = 0.0f;
+
+    car_cmd.target_yaw = cmd_msg.target_yaw;
 
     control_cmd_publisher_->publish(cmd_msg);
-    car_yaw_rad = msg->yaw * (M_PI / 180.0f);
-    // RCLCPP_INFO(this->get_logger(), "target_yaw = %f | is_tracing = %f", cmd_msg.target_yaw, is_tracing_);
-
-}
-
-/**
- *
- * @brief 雷达消息回调函数
- * @param msg
- */
-void CarControlNode::scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg)
-{
-    std::vector<cv::Point2f> laser_points;
-    if (down_state) {
-        laser_points = transformPointsToYawWorld(laserScanToCartesian(*msg), car_yaw_rad);
-    }else {
-        laser_points = laserScanToCartesian(*msg);
-    }
-
-    //转换到底盘坐标系
-    const std::vector<cv::Point3f> laser_points_base =
-        transformLaserPointsToBase(laser_points);
-    //点云聚类
-    std::vector<std::vector<cv::Point2f>> cluster_points = clusterLaserPoints(laser_points, 0.10f);
-    std::vector<LineFeature> point_line;
-
-    for (size_t i = 0; i < cluster_points.size(); i++) {
-        point_line.push_back(fitLinePCA(cluster_points[i]));
-    }
-    // int target_line_idx = 0;
-    // float min_y = 10000.0f;
-    // for (size_t i = 0; i < point_line.size(); i++) {
-    //     if (point_line[i].center.x() < 0) {
-    //         if (min_y > point_line[i].center.y()) {
-    //
-    //         }
-    //     }
-    // }
-    if (debug_mode_)
-    {
-        std::lock_guard<std::mutex> lock(debug_mutex_);
-        laser_points_base_ = laser_points_base;
-        cluster_points_ = cluster_points;
-        point_line_ = point_line;
-    }else {
-        laser_points_base_ = laser_points_base;
-        cluster_points_ = cluster_points;
-        point_line_ = point_line;
-    }
-}
-
-void CarControlNode::updateFSM() {
-    switch (current_state) {
-        case SEARCHING_TARGET:
-            break;
-        case TRACING:
-            break;
-        case SEARCH_TABLE:
-            break;
-        case RETURNING_TABLE:
-
-            break;
-
-        default:
-            break;
-    }
-}
-
-void CarControlNode::changeState(RobotState new_state) {
-
 }
 
 /**
@@ -291,18 +495,17 @@ void CarControlNode::changeState(RobotState new_state) {
  * @return p点到直线ab的距离
  */
 float CarControlNode::pointLineDistance(
-    const cv::Point2f& p,
-    const cv::Point2f& a,
-    const cv::Point2f& b)
-{
+    const cv::Point2f &p,
+    const cv::Point2f &a,
+    const cv::Point2f &b) {
     cv::Point2f ab = b - a;
     cv::Point2f ap = p - a;
 
     float cross =
-        std::abs(ab.x * ap.y - ab.y * ap.x);
+            std::abs(ab.x * ap.y - ab.y * ap.x);
 
     float norm =
-        std::sqrt(ab.x * ab.x + ab.y * ab.y);
+            std::sqrt(ab.x * ab.x + ab.y * ab.y);
 
     if (norm < 1e-6f)
         return 0.0f;
@@ -311,12 +514,55 @@ float CarControlNode::pointLineDistance(
 }
 
 /**
- * @brief 求笛卡尔坐标系下的点与x轴负方向的角度
- * @param p 笛卡尔坐标系下的点
+ * @brief 求笛卡尔坐标系下的一个向量和四个坐标轴方向的夹角
+ * @param p 笛卡尔坐标系下的向量
+ * @param axis 目标坐标轴方向
  * @return 角度（弧度）
  */
-float CarControlNode::projectAndComputeAngle(const cv::Point3f &p) {
-    return std::atan2(p.y, -p.x);
+float CarControlNode::projectAndComputeAngle(
+    const cv::Point3f& p,
+    AxisDirection axis)
+{
+    switch(axis)
+    {
+        case POS_X:
+            return std::atan2(p.y, p.x);
+
+        case NEG_X:
+            return std::atan2(p.y, -p.x);
+
+        case POS_Y:
+            return std::atan2(p.x, p.y);
+
+        case NEG_Y:
+            return std::atan2(p.x, -p.y);
+
+        default:
+            return 0.0f;
+    }
+}
+
+float CarControlNode::projectAndComputeAngle(
+    const Eigen::Vector2f& p,
+    AxisDirection axis)
+{
+    switch(axis)
+    {
+        case POS_X:
+            return std::atan2(p.y(), p.x());
+
+        case NEG_X:
+            return std::atan2(p.y(), -p.x());
+
+        case POS_Y:
+            return std::atan2(p.x(), p.y());
+
+        case NEG_Y:
+            return std::atan2(p.x(), -p.y());
+
+        default:
+            return 0.0f;
+    }
 }
 
 /**
@@ -325,12 +571,11 @@ float CarControlNode::projectAndComputeAngle(const cv::Point3f &p) {
  * @param dist_thresh 聚类距离域值
  * @return 聚类后的点集
  */
-std::vector<std::vector<cv::Point2f>>
- CarControlNode::clusterLaserPoints(
-    const std::vector<cv::Point2f>& points,
-    float threshold)
-{
-    std::vector<std::vector<cv::Point2f>> clusters;
+std::vector<std::vector<cv::Point2f> >
+CarControlNode::clusterLaserPoints(
+    const std::vector<cv::Point2f> &points,
+    float threshold) {
+    std::vector<std::vector<cv::Point2f> > clusters;
 
     if (points.empty())
         return clusters;
@@ -339,16 +584,12 @@ std::vector<std::vector<cv::Point2f>>
 
     current.push_back(points[0]);
 
-    for (size_t i = 1; i < points.size(); i++)
-    {
+    for (size_t i = 1; i < points.size(); i++) {
         float dist = cv::norm(points[i] - points[i - 1]);
 
-        if (dist < threshold)
-        {
+        if (dist < threshold) {
             current.push_back(points[i]);
-        }
-        else
-        {
+        } else {
             if (current.size() > 5)
                 clusters.push_back(current);
 
@@ -360,15 +601,13 @@ std::vector<std::vector<cv::Point2f>>
     if (current.size() > 5)
         clusters.push_back(current);
 
-    if (clusters.size() >= 2)
-    {
-        auto& first = clusters.front();
-        auto& last  = clusters.back();
+    if (clusters.size() >= 2) {
+        auto &first = clusters.front();
+        auto &last = clusters.back();
 
         float dist = cv::norm(first.front() - last.back());
 
-        if (dist < threshold)
-        {
+        if (dist < threshold) {
             // 合并
             last.insert(
                 last.end(),
@@ -389,21 +628,19 @@ std::vector<std::vector<cv::Point2f>>
  * @return 点云拟合直线后的结果
  */
 LineFeature CarControlNode::fitLinePCA(
-    const std::vector<cv::Point2f>& cluster)
-{
+    const std::vector<cv::Point2f> &cluster) {
     LineFeature line;
 
-    Eigen::Vector2f mean(0,0);
+    Eigen::Vector2f mean(0, 0);
 
-    for (auto& p : cluster)
+    for (auto &p: cluster)
         mean += Eigen::Vector2f(p.x, p.y);
 
     mean /= cluster.size();
 
     Eigen::Matrix2f cov = Eigen::Matrix2f::Zero();
 
-    for (auto& p : cluster)
-    {
+    for (auto &p: cluster) {
         Eigen::Vector2f d(p.x - mean.x(),
                           p.y - mean.y());
 
@@ -411,31 +648,36 @@ LineFeature CarControlNode::fitLinePCA(
     }
 
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix2f>
-        solver(cov);
+            solver(cov);
+
+    Eigen::Vector2f reference_dir(-1.0f, 0.0f);
 
     line.normal =
-        solver.eigenvectors().col(0).normalized();
+            solver.eigenvectors().col(0).normalized();
 
     line.tangent =
-        solver.eigenvectors().col(1).normalized();
+            solver.eigenvectors().col(1).normalized();
 
     line.center = mean;
 
     line.length =
-        (Eigen::Vector2f(
-            cluster.front().x,
-            cluster.front().y)
-        -
-        Eigen::Vector2f(
-            cluster.back().x,
-            cluster.back().y)).norm();
-    line.valid = true;
+    (Eigen::Vector2f(
+         cluster.front().x,
+         cluster.front().y)
+     -
+     Eigen::Vector2f(
+         cluster.back().x,
+         cluster.back().y)).norm();
+    // line.valid = true;
+
+    if (line.tangent.dot(reference_dir) < 0) {
+        line.tangent = -line.tangent;
+    }
 
     return line;
 }
 
 cv::Point2f CarControlNode::transformPointToYawWorld(const cv::Point2f &p, float yaw) {
-
     cv::Point2f pw;
     const float c = std::cos(-yaw);
     const float s = std::sin(-yaw);
@@ -446,14 +688,12 @@ cv::Point2f CarControlNode::transformPointToYawWorld(const cv::Point2f &p, float
 }
 
 std::vector<cv::Point2f> CarControlNode::transformPointsToYawWorld(
-    const std::vector<cv::Point2f>& points,
-    float yaw)
-{
+    const std::vector<cv::Point2f> &points,
+    float yaw) {
     std::vector<cv::Point2f> transformed;
     transformed.reserve(points.size());
 
-    for (const auto& p : points)
-    {
+    for (const auto &p: points) {
         cv::Point2f pw = transformPointToYawWorld(p, yaw);
 
         transformed.push_back(pw);
@@ -468,28 +708,35 @@ std::vector<cv::Point2f> CarControlNode::transformPointsToYawWorld(
  * @param angle_rad 角度
  * @return  笛卡尔坐标系下的2D点
  */
-cv::Point2f CarControlNode::polarToCartesian(float range, float angle_rad)
-{
+cv::Point2f CarControlNode::polarToCartesian(float range, float angle_rad) {
     return cv::Point2f(
         range * std::cos(angle_rad),
         range * std::sin(angle_rad));
 }
 
 std::vector<cv::Point2f> CarControlNode::laserScanToCartesian(
-    const sensor_msgs::msg::LaserScan& scan)
-{
+    const sensor_msgs::msg::LaserScan &scan) {
     std::vector<cv::Point2f> points;
     points.reserve(scan.ranges.size());
 
+    float f_left = -10.0f * (M_PI / 180.0f);
+    float f_right = 10.0f * (M_PI / 180.0f);
+    float b_left = (-180.0f + 30.0f) * (M_PI / 180.0f);
+    float b_right = (180.0f - 30.0f) * (M_PI / 180.0f);
     float angle = scan.angle_min;
     // float angle = now_car_yaw;
-    for (const float range : scan.ranges) {
+    for (const float range: scan.ranges) {
+        if (angle < f_left && angle > b_left || angle > f_right && angle < b_right) {
+            angle += scan.angle_increment;
+            continue;
+        }
         if (std::isfinite(range) &&
             range >= scan.range_min &&
-            range <= scan.range_max) {
+            range <= 3.5f) {
             points.emplace_back(polarToCartesian(range, angle));
-            }
+        }
         angle += scan.angle_increment;
+        // RCLCPP_INFO(this->get_logger(), "angle = %f", angle);
     }
 
     return points;
@@ -500,8 +747,7 @@ std::vector<cv::Point2f> CarControlNode::laserScanToCartesian(
  * @param rpy
  * @return cv3x3矩阵
  */
-cv::Matx33d CarControlNode::rpyToRotationMatrix(const cv::Vec3d& rpy)
-{
+cv::Matx33d CarControlNode::rpyToRotationMatrix(const cv::Vec3d &rpy) {
     const double roll = rpy[0];
     const double pitch = rpy[1];
     const double yaw = rpy[2];
@@ -540,10 +786,9 @@ cv::Matx33d CarControlNode::rpyToRotationMatrix(const cv::Vec3d& rpy)
  * @return 按照旋转矩阵和平移矩阵转换后的三维点
  */
 cv::Point3f CarControlNode::transformPoint(
-    const cv::Point3f& point,
-    const cv::Matx33d& rotation,
-    const cv::Vec3d& translation)
-{
+    const cv::Point3f &point,
+    const cv::Matx33d &rotation,
+    const cv::Vec3d &translation) {
     const cv::Vec3d point_vec(point.x, point.y, point.z);
     const cv::Vec3d transformed = rotation * point_vec + translation;
 
@@ -559,12 +804,11 @@ cv::Point3f CarControlNode::transformPoint(
  * @return 转换后的雷达点集
  */
 std::vector<cv::Point3f> CarControlNode::transformLaserPointsToBase(
-    const std::vector<cv::Point2f>& laser_points) const
-{
+    const std::vector<cv::Point2f> &laser_points) const {
     std::vector<cv::Point3f> transformed_points;
     transformed_points.reserve(laser_points.size());
 
-    for (const auto& point : laser_points) {
+    for (const auto &point: laser_points) {
         transformed_points.push_back(transformPoint(
             cv::Point3f(point.x, point.y, 0.0F),
             lidar_to_base_rotation_,
@@ -579,12 +823,11 @@ std::vector<cv::Point3f> CarControlNode::transformLaserPointsToBase(
  * @brief 指定多线程核
  * @param cores 核ID
  */
-void CarControlNode::bindThreadToCores(const std::vector<int>& cores)
-{
+void CarControlNode::bindThreadToCores(const std::vector<int> &cores) {
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
 
-    for (int core : cores) {
+    for (int core: cores) {
         CPU_SET(core, &cpuset);
     }
 
@@ -595,8 +838,7 @@ void CarControlNode::bindThreadToCores(const std::vector<int>& cores)
     }
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     rclcpp::init(argc, argv);
     rclcpp::executors::SingleThreadedExecutor executor;
     auto node = std::make_shared<CarControlNode>();

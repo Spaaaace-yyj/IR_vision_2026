@@ -9,21 +9,22 @@
  *
  * @brief debug线程，绘制debug数据
  */
-void CarControlNode::debugThread()
-{
+void CarControlNode::debugThread() {
     bindThreadToCores({7});
+
+    int show_delay_count = 0;
     cv::Mat img;
     std::vector<CubeState> cubes;
     std::vector<CubeState> cubes_base;
     std::vector<cv::Point3f> laser_points_base;
-    std::vector<std::vector<cv::Point2f>> cluster_points;
+    std::vector<std::vector<cv::Point2f> > cluster_points;
     std::vector<LineFeature> lines;
     double detector_latency;
-    while (debug_running_.load(std::memory_order_relaxed) && rclcpp::ok())
-    {
+    while (debug_running_.load(std::memory_order_relaxed) && rclcpp::ok()) {
         static auto last = this->now();
 
-        if ((this->now() - last).seconds() < 0.05) { // 20Hz
+        if ((this->now() - last).seconds() < 0.05) {
+            // 20Hz
             continue;
         }
         last = this->now();
@@ -43,7 +44,7 @@ void CarControlNode::debugThread()
         }
 
 
-        if(debug_mode_){
+        if (debug_mode_) {
             img = pkt.frame;
             cubes = pkt.result.cubes_camera;
             cubes_base = pkt.result.cubes_base;
@@ -54,18 +55,65 @@ void CarControlNode::debugThread()
                 int image_width = img.cols;
                 int image_height = img.rows;
                 drawCubes(img, cubes, camera_matrix_, dist_coeffs_);
-                cv::line(img, cv::Point(image_width / 2, 0), cv::Point(image_width / 2, image_height), cv::Scalar(255,255,255), 1);
-                cv::line(img, cv::Point(0, image_height / 2), cv::Point(image_width, image_height / 2), cv::Scalar(255,255,255), 1);
-                cv::circle(img, cv::Point(image_width / 2, image_height / 2), 15, cv::Scalar(100,255,100), 1);
+                cv::line(img, cv::Point(image_width / 2, 0), cv::Point(image_width / 2, image_height),
+                         cv::Scalar(255, 255, 255), 1);
+                cv::line(img, cv::Point(0, image_height / 2), cv::Point(image_width, image_height / 2),
+                         cv::Scalar(255, 255, 255), 1);
+                cv::circle(img, cv::Point(image_width / 2, image_height / 2), 15, cv::Scalar(100, 255, 100), 1);
                 std::stringstream ss;
+                CarControlCmd car_cmd_debug = car_cmd;
                 ss << "Latency: " << std::fixed << std::setprecision(2) << detector_latency << " ms";
+                std::stringstream cmd_target_yaw;
+                cmd_target_yaw << "target_yaw:" << std::fixed << std::setprecision(5) << car_cmd_debug.target_yaw;
+                std::stringstream cmd_target_speed;
+                cmd_target_speed << "target_speed:" << std::fixed << std::setprecision(2) << car_cmd_debug.target_speed;
 
                 cv::putText(img, ss.str(),
-                    cv::Point(10, 30),
-                    cv::FONT_HERSHEY_SIMPLEX,
-                    1.0,
-                    cv::Scalar(0,255,0),
-                    2);
+                            cv::Point(10, 30),
+                            cv::FONT_HERSHEY_SIMPLEX,
+                            1.0,
+                            cv::Scalar(0, 255, 0),
+                            2);
+                cv::putText(img, cmd_target_yaw.str(),
+                            cv::Point(img.cols - 400, 30),
+                            cv::FONT_HERSHEY_SIMPLEX,
+                            1.0,
+                            cv::Scalar(255, 255, 255),
+                            2);
+                cv::putText(img, cmd_target_speed.str(),
+                            cv::Point(img.cols - 400, 60),
+                            cv::FONT_HERSHEY_SIMPLEX,
+                            1.0,
+                            cv::Scalar(255, 255, 255),
+                            2);
+
+                if (current_state == TRACING) {
+                    show_delay_count++;
+                    //闪烁效果，除了看着炫酷没别的用QWQ
+                    if (show_delay_count <= 2) {
+                        cv::rectangle(img, cv::Point(10, 70),
+                                      cv::Point(150, 110),
+                                      cv::Scalar(0, 255, 0),
+                                      5);
+                    }else if (show_delay_count >= 3){
+                        show_delay_count = 0;
+                    }
+
+                    cv::putText(img, stateToString(current_state),
+                                cv::Point(20, 100),
+                                cv::FONT_HERSHEY_SIMPLEX,
+                                1.0,
+                                cv::Scalar(0, 0, 255),
+                                2);
+
+                } else {
+                    cv::putText(img, stateToString(current_state),
+                                cv::Point(10, 100),
+                                cv::FONT_HERSHEY_SIMPLEX,
+                                1.0,
+                                cv::Scalar(0, 255, 0),
+                                2);
+                }
                 // cv::imshow("Camera", img);
             }
 
@@ -97,9 +145,9 @@ void CarControlNode::debugThread()
  * @param p 绘制坐标
  * @param frame 需要绘制的图像
  */
-void CarControlNode::drawX(cv::Point2f p, cv::Mat& frame){
-    cv::line(frame, p + cv::Point2f(-30, -30), p + cv::Point2f(30, 30), cv::Scalar(0,0,255), 1);
-    cv::line(frame, p + cv::Point2f(-30, 30), p + cv::Point2f(30, -30), cv::Scalar(0,0,255), 1);
+void CarControlNode::drawX(cv::Point2f p, cv::Mat &frame) {
+    cv::line(frame, p + cv::Point2f(-30, -30), p + cv::Point2f(30, 30), cv::Scalar(0, 0, 255), 1);
+    cv::line(frame, p + cv::Point2f(-30, 30), p + cv::Point2f(30, -30), cv::Scalar(0, 0, 255), 1);
 }
 
 /**
@@ -112,12 +160,11 @@ void CarControlNode::drawX(cv::Point2f p, cv::Mat& frame){
  * @return 构造后的mat
  */
 cv::Mat CarControlNode::buildLaserScanView(
-    const std::vector<cv::Point3f>& points,
-    const std::vector<std::vector<cv::Point2f>>& clusters,
-    const std::vector<LineFeature>& lines,
-    const std::vector<CubeState>& cubes,
-    int image_size)
-{
+    const std::vector<cv::Point3f> &points,
+    const std::vector<std::vector<cv::Point2f> > &clusters,
+    const std::vector<LineFeature> &lines,
+    const std::vector<CubeState> &cubes,
+    int image_size) {
     //debug laserscan color list
     std::vector<cv::Scalar> cluster_colors = {
         {255, 0, 0},
@@ -140,11 +187,11 @@ cv::Mat CarControlNode::buildLaserScanView(
     cv::circle(view, center, 4, cv::Scalar(0, 255, 255), -1);
 
     float max_extent = 0.1F;
-    for (const auto& point : points) {
+    for (const auto &point: points) {
         max_extent = std::max(max_extent, std::abs(point.x));
         max_extent = std::max(max_extent, std::abs(point.y));
     }
-    for (const auto& cube : cubes) {
+    for (const auto &cube: cubes) {
         if (!cube.valid) {
             continue;
         }
@@ -165,15 +212,13 @@ cv::Mat CarControlNode::buildLaserScanView(
     //         cv::circle(view, cv::Point(px, py), 1, cv::Scalar(0, 255, 0), -1);
     //     }
     // }
-    for (size_t cid = 0; cid < clusters.size(); ++cid)
-    {
-        const auto& cluster = clusters[cid];
+    for (size_t cid = 0; cid < clusters.size(); ++cid) {
+        const auto &cluster = clusters[cid];
 
         cv::Scalar color =
-            cluster_colors[cid % cluster_colors.size()];
+                cluster_colors[cid % cluster_colors.size()];
 
-        for (const auto& point : cluster)
-        {
+        for (const auto &point: cluster) {
             int px = static_cast<int>(
                 std::lround(center.x - point.y * scale));
 
@@ -181,8 +226,7 @@ cv::Mat CarControlNode::buildLaserScanView(
                 std::lround(center.y + point.x * scale));
 
             if (px >= 0 && px < image_size &&
-                py >= 0 && py < image_size)
-            {
+                py >= 0 && py < image_size) {
                 cv::circle(
                     view,
                     cv::Point(px, py),
@@ -193,18 +237,17 @@ cv::Mat CarControlNode::buildLaserScanView(
         }
     }
 
-    for (const auto& line : lines)
-    {
+    for (const auto &line: lines) {
         if (!line.valid)
             continue;
 
         Eigen::Vector2f p1 =
-            line.center -
-            line.tangent * line.length * 0.5f;
+                line.center -
+                line.tangent * line.length * 0.5f;
 
         Eigen::Vector2f p2 =
-            line.center +
-            line.tangent * line.length * 0.5f;
+                line.center +
+                line.tangent * line.length * 0.5f;
 
         cv::Point cv_p1(
             static_cast<int>(
@@ -226,7 +269,7 @@ cv::Mat CarControlNode::buildLaserScanView(
             2);
     }
 
-    for (const auto& cube : cubes) {
+    for (const auto &cube: cubes) {
         if (!cube.valid) {
             continue;
         }
@@ -244,10 +287,10 @@ cv::Mat CarControlNode::buildLaserScanView(
 
         std::ostringstream label_stream;
         label_stream << std::fixed << std::setprecision(2)
-                     << "ID:" << cube.id
-                     << " (" << cube.center.x
-                     << ", " << cube.center.y
-                     << ", " << cube.center.z << ")";
+                << "ID:" << cube.id
+                << " (" << cube.center.x
+                << ", " << cube.center.y
+                << ", " << cube.center.z << ")";
 
         const int label_x = std::max(10, std::min(px + 12, image_size - 220));
         const int label_y = std::max(20, std::min(py - 12, image_size - 10));
@@ -265,10 +308,14 @@ cv::Mat CarControlNode::buildLaserScanView(
             1);
     }
 
-    cv::putText(view, "FWD (-X)", cv::Point(center.x - 36, 20), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(200, 200, 200), 1);
-    cv::putText(view, "LEFT (+Y)", cv::Point(10, center.y - 8), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(200, 200, 200), 1);
-    cv::putText(view, "REAR (+X)", cv::Point(center.x - 40, image_size - 75), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(160, 160, 160), 1);
-    cv::putText(view, "RIGHT (-Y)", cv::Point(image_size - 92, center.y - 8), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(160, 160, 160), 1);
+    cv::putText(view, "FWD (-X)", cv::Point(center.x - 36, 20), cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                cv::Scalar(200, 200, 200), 1);
+    cv::putText(view, "LEFT (+Y)", cv::Point(10, center.y - 8), cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                cv::Scalar(200, 200, 200), 1);
+    cv::putText(view, "REAR (+X)", cv::Point(center.x - 40, image_size - 75), cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                cv::Scalar(160, 160, 160), 1);
+    cv::putText(view, "RIGHT (-Y)", cv::Point(image_size - 92, center.y - 8), cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                cv::Scalar(160, 160, 160), 1);
     cv::putText(
         view,
         "Points: " + std::to_string(points.size()),
@@ -305,58 +352,56 @@ cv::Mat CarControlNode::buildLaserScanView(
  * @param dist_coeffs 相机畸变参数
  */
 void CarControlNode::drawCubes(
-    cv::Mat& frame,
-    const std::vector<CubeState>& cubes,
-    const cv::Mat& camera_matrix,
-    const cv::Mat& dist_coeffs)
-{
-    if(cubes.empty()){
+    cv::Mat &frame,
+    const std::vector<CubeState> &cubes,
+    const cv::Mat &camera_matrix,
+    const cv::Mat &dist_coeffs) {
+    if (cubes.empty()) {
         cv::putText(frame, "No cubes detected",
-            cv::Point(10, 60),
-            cv::FONT_HERSHEY_SIMPLEX,
-            1.0,
-            cv::Scalar(0,0,255),
-            2);
+                    cv::Point(10, 60),
+                    cv::FONT_HERSHEY_SIMPLEX,
+                    1.0,
+                    cv::Scalar(0, 0, 255),
+                    2);
         drawX(cv::Point2f(frame.cols / 2, frame.rows / 2), frame);
         return;
-    }else{
+    } else {
         std::stringstream ss;
         ss << "Cubes detected num: " << cubes.size();
 
         cv::putText(frame, ss.str(),
-            cv::Point(10, 60),
-            cv::FONT_HERSHEY_SIMPLEX,
-            1.0,
-            cv::Scalar(0,255,0),
-            2);
+                    cv::Point(10, 60),
+                    cv::FONT_HERSHEY_SIMPLEX,
+                    1.0,
+                    cv::Scalar(0, 255, 0),
+                    2);
     }
 
     std::vector<cv::Point2f> target_center2d;
 
-    for (const auto& cube : cubes)
-    {
+    for (const auto &cube: cubes) {
         if (!cube.valid) continue;
 
         std::vector<cv::Point3f> center3d = {cube.center};
         std::vector<cv::Point2f> center2d;
 
         cv::projectPoints(center3d,
-            cv::Mat::zeros(3,1,CV_64F),
-            cv::Mat::zeros(3,1,CV_64F),
-            camera_matrix, dist_coeffs,
-            center2d);
+                          cv::Mat::zeros(3, 1,CV_64F),
+                          cv::Mat::zeros(3, 1,CV_64F),
+                          camera_matrix, dist_coeffs,
+                          center2d);
 
         if (!center2d.empty()) {
-            cv::circle(frame, center2d[0], 3, cv::Scalar(100,255,255), -1);
-            cv::line(frame, center2d[0], cv::Point(frame.cols / 2, frame.rows), cv::Scalar(255,255,255), 1);
+            cv::circle(frame, center2d[0], 3, cv::Scalar(100, 255, 255), -1);
+            cv::line(frame, center2d[0], cv::Point(frame.cols / 2, frame.rows), cv::Scalar(255, 255, 255), 1);
 
             cv::putText(frame,
-                "ID:" + std::to_string(cube.id),
-                center2d[0],
-                cv::FONT_HERSHEY_SIMPLEX,
-                0.6,
-                cv::Scalar(0,0,255),
-                1);
+                        "ID:" + std::to_string(cube.id),
+                        center2d[0],
+                        cv::FONT_HERSHEY_SIMPLEX,
+                        0.6,
+                        cv::Scalar(0, 0, 255),
+                        1);
         }
 
         if (cube.id == 1 && is_blue) {
@@ -369,7 +414,7 @@ void CarControlNode::drawCubes(
             target_center2d = center2d;
         }
 
-        if(cube.id == 0 && !center2d.empty()){
+        if (cube.id == 0 && !center2d.empty()) {
             drawX(center2d[0], frame);
         }
         if (cube.R.empty()) continue;
@@ -377,21 +422,20 @@ void CarControlNode::drawCubes(
         float l = cube_size / 2.0;
 
         std::vector<cv::Point3f> cube_pts_local = {
-            {-l,-l,-l},{ l,-l,-l},{ l, l,-l},{-l, l,-l},
-            {-l,-l, l},{ l,-l, l},{ l, l, l},{-l, l, l}
+            {-l, -l, -l}, {l, -l, -l}, {l, l, -l}, {-l, l, -l},
+            {-l, -l, l}, {l, -l, l}, {l, l, l}, {-l, l, l}
         };
 
         std::vector<cv::Point3f> cube_pts_world;
 
-        for (auto &p : cube_pts_local)
-        {
-            cv::Mat pt = (cv::Mat_<double>(3,1) << p.x, p.y, p.z);
+        for (auto &p: cube_pts_local) {
+            cv::Mat pt = (cv::Mat_<double>(3, 1) << p.x, p.y, p.z);
 
             cv::Mat transformed = cube.R * pt +
-                (cv::Mat_<double>(3,1) <<
-                    cube.center.x,
-                    cube.center.y,
-                    cube.center.z);
+                                  (cv::Mat_<double>(3, 1) <<
+                                   cube.center.x,
+                                   cube.center.y,
+                                   cube.center.z);
 
             cube_pts_world.emplace_back(
                 transformed.at<double>(0),
@@ -403,36 +447,35 @@ void CarControlNode::drawCubes(
 
         cv::projectPoints(
             cube_pts_world,
-            cv::Mat::zeros(3,1,CV_64F),
-            cv::Mat::zeros(3,1,CV_64F),
+            cv::Mat::zeros(3, 1,CV_64F),
+            cv::Mat::zeros(3, 1,CV_64F),
             camera_matrix,
             dist_coeffs,
             pts2d);
 
         if (pts2d.size() != 8) continue;
 
-        std::vector<std::pair<int,int>> edges = {
-            {0,1},{1,2},{2,3},{3,0},
-            {4,5},{5,6},{6,7},{7,4},
-            {0,4},{1,5},{2,6},{3,7},
+        std::vector<std::pair<int, int> > edges = {
+            {0, 1}, {1, 2}, {2, 3}, {3, 0},
+            {4, 5}, {5, 6}, {6, 7}, {7, 4},
+            {0, 4}, {1, 5}, {2, 6}, {3, 7},
         };
 
         cv::Scalar edge_color;
-        if(cube.id == 1){
+        if (cube.id == 1) {
             edge_color = cv::Scalar(255, 255, 0);
-        }else if(cube.id == 2){
+        } else if (cube.id == 2) {
             edge_color = cv::Scalar(0, 255, 255);
-        }else{
+        } else {
             edge_color = cv::Scalar(200, 255, 255);
         }
 
-        for (auto &e : edges)
-        {
+        for (auto &e: edges) {
             cv::line(frame,
-                pts2d[e.first],
-                pts2d[e.second],
-                edge_color,
-                1);
+                     pts2d[e.first],
+                     pts2d[e.second],
+                     edge_color,
+                     1);
         }
 
         // for (auto &tag : cube.tags)
@@ -448,4 +491,32 @@ void CarControlNode::drawCubes(
     if (!target_center2d.empty()) {
         drawX(target_center2d[0], frame);
     }
+}
+
+std::string CarControlNode::stateToString(RobotState state) {
+    switch (state) {
+        case SEARCHING_TARGET:
+            return "SEARCHING_TARGET";
+
+        case TRACING:
+            return "TRACING";
+
+        case SEARCH_TABLE:
+            return "SEARCH_TABLE";
+
+        case READY_TO_PUSH:
+            return "READY_TO_PUSH";
+
+        default:
+            return "UNKNOWN_STATE";
+    }
+}
+
+void CarControlNode::DebugFSMStateChangeInfo(RobotState new_state) {
+    RCLCPP_INFO(
+        this->get_logger(),
+        "State Change: %s -> %s",
+        stateToString(current_state).c_str(),
+        stateToString(new_state).c_str()
+    );
 }

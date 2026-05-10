@@ -30,11 +30,15 @@ typedef struct
 {
 	float target_yaw;
 	float tracing;	//0 or 1
+	float cmd_state;	//小电脑返回上层算法状态，目前一共四种从上到下从0开始对应
+	//小电脑控制机器人速度，当cmd_state为READY_TO_PUSH(2)和READY_TO_PUSH(3)的时候需要单片机接受这个数据并且按照这个数据控制机器人
+	float car_speed;
 } Vision_Send_s;
 
 typedef struct
 {
 	float yaw;
+	float mcu_feed_state;	//单片机返回两个状态，在台上，在台下
 	float laser_ranging_L0;
 	float laser_ranging_L1;
 	float laser_ranging_R0;

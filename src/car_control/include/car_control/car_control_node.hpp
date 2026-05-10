@@ -25,13 +25,44 @@
 #include "tag_detector.hpp"
 #include "auto_aim_interfaces/msg/mcu_feed_back.hpp"
 
+#define DEG2RED (M_PI / 180.0f)
+#define RED2DEG (180.0f / M_PI)
 using namespace std::chrono_literals;
 
 enum RobotState {
     SEARCHING_TARGET,
-    TRACING,
-    SEARCH_TABLE,
-    RETURNING_TABLE
+    TRACING,    //单片机执行target_yaw对应的yaw,速度还是由单片机控制
+    SEARCH_TABLE,   //掉台后，单片机把角度和速度控制权交给小电脑
+    READY_TO_PUSH,  //这个看是还是由小电脑控制还是由
+};
+
+enum SearchTableState {
+    IDLE,
+    ALIGN_WALL,     //对齐当前的墙，目标值直接为墙角度(垂直墙)
+    CHECK_IS_INSIDE,
+    CHANGE_WALL,    //切换墙，目标值为设定的固定角度
+    TURN_ROUND,
+    MOVE_TO_CENTER,
+    ADJUST_DISTANCE,
+};
+
+enum MCUFeedState {
+    ON_TABLE,
+    FALL_TABLE,
+};
+
+enum AxisDirection
+{
+    POS_X,
+    NEG_X,
+    POS_Y,
+    NEG_Y
+};
+
+struct CarControlCmd {
+    float target_yaw;
+    float target_speed;
+    float wall_yaw_offset;
 };
 
 struct LineFeature
@@ -71,28 +102,23 @@ public:
 
     void scanCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
 
-    void changeState(RobotState new_state);
-
     void updateFSM();
 
-    void drawCubes(
-    cv::Mat& frame,
-    const std::vector<CubeState>& cubes,
-    const cv::Mat& camera_matrix,
-    const cv::Mat& dist_coeffs);
+    void updateEvent();
 
-    void drawX(cv::Point2f p, cv::Mat& frame);
+    void changeState(RobotState new_state);
+
+    void updateTableFSM();
+
+    void updateUpTableEvent();
+
+    void changeUpTableState(SearchTableState new_state);
+
+    void pubTargetCube();
 
     static cv::Point2f polarToCartesian(float range, float angle_rad);
 
     std::vector<cv::Point2f> laserScanToCartesian(const sensor_msgs::msg::LaserScan& scan);
-
-    static cv::Mat buildLaserScanView(
-        const std::vector<cv::Point3f>& points,
-        const std::vector<std::vector<cv::Point2f>>& clusters,
-        const std::vector<LineFeature>& lines,
-        const std::vector<CubeState>& cubes,
-        int image_size = 1000);
 
     static cv::Matx33d rpyToRotationMatrix(const cv::Vec3d& rpy);
 
@@ -106,7 +132,14 @@ public:
 
     LineFeature fitLinePCA(const std::vector<cv::Point2f>& cluster);
 
-    float projectAndComputeAngle(const cv::Point3f& p);
+    float projectAndComputeAngle(
+        const cv::Point3f &p,
+        AxisDirection axis);
+
+
+    float projectAndComputeAngle(
+        const Eigen::Vector2f &p,
+        AxisDirection axis);
 
     std::vector<std::vector<cv::Point2f> > clusterLaserPoints(
     const std::vector<cv::Point2f>& points,
@@ -125,13 +158,43 @@ public:
     const cv::Point2f& a,
     const cv::Point2f& b);
 
+    bool CheckFindTarget() const;
+
+    //debug function
     void debugThread();
+
+    void drawX(cv::Point2f p, cv::Mat& frame);
+
+    static cv::Mat buildLaserScanView(
+    const std::vector<cv::Point3f>& points,
+    const std::vector<std::vector<cv::Point2f>>& clusters,
+    const std::vector<LineFeature>& lines,
+    const std::vector<CubeState>& cubes,
+    int image_size = 1000);
+
+    void drawCubes(
+        cv::Mat &frame,
+        const std::vector<CubeState> &cubes,
+        const cv::Mat &camera_matrix,
+        const cv::Mat &dist_coeffs);
+
+    std::string stateToString(RobotState state);
+
+    void DebugFSMStateChangeInfo(RobotState new_state);
 
     void bindThreadToCores(const std::vector<int>& cores);
 
 private:
 
-    RobotState current_state;
+    RobotState current_state = SEARCH_TABLE;
+    MCUFeedState feed_state = ON_TABLE;
+    SearchTableState search_table_state = IDLE;
+
+    CarControlCmd car_cmd = {
+        .target_yaw = 0.0f,
+        .target_speed = 0.0f,
+        .wall_yaw_offset = 0.0f,
+    };
 
     CubeDetectParams cube_detector_params;
     std::unique_ptr<Detector> cube_detector_;
@@ -182,6 +245,7 @@ private:
     std::vector<LineFeature> point_line_;
 
     float car_yaw_rad = 0.0f;
+    float car_yaw_deg = 0.0f;
 
     bool down_state = false;
 

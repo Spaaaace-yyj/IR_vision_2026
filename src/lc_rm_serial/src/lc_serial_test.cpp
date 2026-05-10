@@ -46,6 +46,8 @@ void LcSerialTestNode::CarControlCallback(const auto_aim_interfaces::msg::Cmd::S
 {
     send_data.target_yaw = msg->target_yaw;
     send_data.tracing = msg->tracing;
+    send_data.cmd_state = msg->cmd_state;
+    send_data.car_speed = msg->car_speed;
 }
 
 void LcSerialTestNode::OpenPort(){
@@ -91,7 +93,7 @@ void LcSerialTestNode::SendData(){
     uint16_t tx_len;
     uint8_t send_temp[64]= {0};
 
-    get_protocol_send_data(0x01, flags_register, &send_data.target_yaw, 2, send_temp, &tx_len);
+    get_protocol_send_data(0x01, flags_register, &send_data.target_yaw, 4, send_temp, &tx_len);
     std::vector<uint8_t> send_buffer(send_temp, send_temp + tx_len);
     //debug
     // for (size_t i = 0; i < send_buffer.size(); ++i)
